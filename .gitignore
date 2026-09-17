@@ -1,0 +1,4 @@
+.idea/
+data/raw/
+__pycache__/
+*.pyc

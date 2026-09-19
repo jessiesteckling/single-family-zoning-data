@@ -242,11 +242,15 @@ CLAUDE.md asks for "small, testable functions for data transformations ... so th
 verified independently of the chart output". `categorize` and the share arithmetic are pure
 and trivially coverable. No test directory exists.
 
-### M11. No dependency manifest
+### M11. No dependency manifest — resolved
 
-No `requirements.txt` or `pyproject.toml`. geopandas, pandas, requests and a GeoJSON engine
-are all undeclared. `fiona` is not installed in the working environment; the code runs only
-because geopandas 1.x defaults to pyogrio.
+Originally: nothing declared geopandas, pandas, requests or a GeoJSON engine. `fiona` is
+not installed in the working environment; the code runs only because geopandas 1.x defaults
+to pyogrio.
+
+Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
+(`geopandas`, `pandas`, `requests`) and lock the full transitive set, pyogrio included.
+`python_version` is 3.11, the floor `pandas` 3.x requires.
 
 ## Low
 

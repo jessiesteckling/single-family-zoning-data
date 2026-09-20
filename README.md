@@ -26,7 +26,7 @@ Neither dataset knows about the other, so a spatial overlay (`src/analyze.py`) i
 ## Categories
 
 The four-way breakdown follows the map *Where apartments are allowed in Chicago*, from the
-Chicago Cityscape blog post [How much of Chicago bans apartments?](https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb) (May 2022; zoning
+Chicago Cityscape blog post [Apartments & condos are banned in most of Chicago](https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb) (May 2022; zoning
 data as of March 2022; groupings and calculations done in PostGIS). The prefix groupings in
 `src/categorize.py` come from it directly — the map's own footnote reads "Apartments & condos are allowed in RT, RM, B, C, DR, DC, and DX
 zoning districts."

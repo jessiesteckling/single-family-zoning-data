@@ -1,6 +1,11 @@
 """Group Chicago zone_class codes into the four categories used by Steven
-Vance's "Where apartments are allowed in Chicago" map: whether new apartments/
-condos are allowed under each district's base zoning.
+Vance's map "Where apartments are allowed in Chicago" (May 2022, zoning data as
+of March 2022): whether new apartments/condos are allowed under each district's
+base zoning.
+
+ALLOWED_PREFIXES is that map's own list, per its footnote: "Apartments & condos
+are allowed in RT, RM, B, C, DR, DC, and DX zoning districts." Taking C whole
+includes C3, which permits no housing -- kept for fidelity to the source.
 """
 
 import re

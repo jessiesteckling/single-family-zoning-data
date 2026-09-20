@@ -87,6 +87,11 @@ ground floor; C3 permits none. The blanket `"C"` prefix catches all three.
 77 polygons, 0.38 sq mi, 0.16% of city land. Small in area, but wrong, and `_legend()`
 advertises `C` wholesale so the report states it as fact.
 
+Reclassified as inherited, not a transcription slip: the source map groups every `C`
+district as apartments-allowed, so the code is faithful to what it cites. Fixing it means
+deliberately diverging from the source, which is a choice to make explicitly rather than
+silently. Noted as a caveat in the README in the meantime.
+
 ### H3. `DS` is reported as no-residential; DS permits dwelling units
 
 `src/report.py:33`
@@ -263,10 +268,24 @@ invalid input as the data changes, and an ignored warning will hide the next rea
 
 `src/categorize.py:1-4`
 
-The docstring attributes the four categories to Steven Vance's "Where apartments are
-allowed in Chicago" map. The full scheme is behind a Chicago Cityscape membership paywall.
-The RS bucket checks out; the rest is unconfirmable. Either link the source or drop the
-appeal to authority.
+Resolved 2026-09-20. The map itself was located and read. Its footnote states "Apartments
+& condos are allowed in RT, RM, B, C, DR, DC, and DX zoning districts", which is exactly
+`ALLOWED_PREFIXES`, and its four categories match `CATEGORY_ORDER`. The code is a faithful
+transcription. Attribution with date and data vintage is now in the README and the module
+docstring.
+
+The map is also the strongest external check on the pipeline. Citywide shares, four and a
+half years apart:
+
+| Category | Vance, Mar 2022 | This repo, Sep 2026 |
+|---|---|---|
+| Not allowed (RS) | 40.7% | 40.3% |
+| Allowed | 20.9% | 21.3% |
+| Planned Developments | 13.3% | 14.1% |
+| All other | 25.0% | 24.3% |
+
+Within 0.8 points on every category, with the drift in the direction the intervening zoning
+changes would predict.
 
 ### M10. No tests
 

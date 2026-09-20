@@ -56,4 +56,7 @@
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
 - Apartments Allowed: B, C, DC, DR, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
-- Other: everything else (e.g. M, POS, PMD, T, DS) -- no residential allowed
+- Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
+
+**Ward 41 and O'Hare.** One polygon, zone_class `PD 0`, covers the airport: 10.3 sq mi, 32% of all Planned Development land in the city and 60% of Ward 41 by area. It is classified correctly -- the zoning ordinance designates land within the Airport Layout Plan the Airport Planned Development -- but it dominates Ward 41's denominator and deflates every other figure in that row, so that ward is not comparable to the rest on this table. O'Hare falls entirely within Ward 41; no other ward is affected.
+

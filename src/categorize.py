@@ -1,6 +1,13 @@
-"""Group Chicago zone_class codes into the four categories used by Steven
-Vance's "Where apartments are allowed in Chicago" map: whether new apartments/
-condos are allowed under each district's base zoning.
+"""Group Chicago zone_class codes into the four categories used by the Chicago
+Cityscape blog's map "Where apartments are allowed in Chicago" (May 2022, zoning
+data as of March 2022): whether new apartments/condos are allowed under each
+district's base zoning.
+
+Source: https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb
+
+ALLOWED_PREFIXES is that map's own list, per its footnote: "Apartments & condos
+are allowed in RT, RM, B, C, DR, DC, and DX zoning districts." Taking C whole
+includes C3, which permits no housing -- kept for fidelity to the source.
 """
 
 import re
@@ -32,3 +39,11 @@ def categorize(zone_class: str) -> str:
     if prefix in ALLOWED_PREFIXES:
         return ALLOWED
     return OTHER
+
+# The categories where residential is permitted or negotiable. Excludes OTHER,
+# which is the zones that allow no housing at all.
+RESIDENTIAL_CATEGORY_ORDER = [NOT_ALLOWED, ALLOWED, PLANNED_DEV]
+
+# O'Hare. One polygon, correctly a Planned Development under the Airport Planned
+# Development of 1964-01-23, but large enough to dominate ward 41's totals.
+OHARE_ZONE_CLASS = "PD 0"

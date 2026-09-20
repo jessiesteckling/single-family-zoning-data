@@ -10,13 +10,14 @@ from pathlib import Path
 
 from src.analyze import (
     compute_citywide_category_shares,
+    compute_ohare_context,
     compute_ward_category_shares,
     restrict_category_shares,
     restrict_ward_shares,
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.fetch_data import fetch_geojson
-from src.report import format_ward_report
+from src.report import format_ward_report, ohare_note
 
 ZONING_DATASET_ID = "dj47-wfun"  # Boundaries - Zoning Districts (current)
 WARDS_DATASET_ID = "p293-wvbd"  # Boundaries - Wards (2023-)
@@ -33,6 +34,8 @@ def main() -> None:
     shares = compute_ward_category_shares(zoning, wards)
     citywide = compute_citywide_category_shares(zoning)
 
+    notes = [ohare_note(compute_ohare_context(zoning, wards))]
+
     residential_shares = restrict_ward_shares(shares, RESIDENTIAL_CATEGORY_ORDER)
     residential_citywide = restrict_category_shares(
         citywide, RESIDENTIAL_CATEGORY_ORDER
@@ -43,13 +46,15 @@ def main() -> None:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     reports = {
-        OUTPUT_DIR / "ward_zoning_report.md": format_ward_report(shares, citywide),
+        OUTPUT_DIR
+        / "ward_zoning_report.md": format_ward_report(shares, citywide, notes=notes),
         OUTPUT_DIR
         / "ward_zoning_report_residential.md": format_ward_report(
             residential_shares,
             residential_citywide,
             categories=RESIDENTIAL_CATEGORY_ORDER,
             title="Share of residentially zoned land, by ward",
+            notes=notes,
         ),
     }
     for path, report in reports.items():

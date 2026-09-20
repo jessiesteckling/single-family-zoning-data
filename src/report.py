@@ -9,7 +9,9 @@ residential-only one.
 
 import pandas as pd
 
+from .analyze import OhareContext
 from .categorize import (
+    OHARE_ZONE_CLASS,
     ALLOWED,
     ALLOWED_PREFIXES,
     CATEGORY_ORDER,
@@ -41,6 +43,21 @@ _EXCLUDED_NOTE = (
 )
 
 
+def ohare_note(context: OhareContext) -> str:
+    """Footnote for the Planned Development column, which O'Hare dominates."""
+    return (
+        f"**Ward {context.ward} and O'Hare.** One polygon, zone_class "
+        f"`{OHARE_ZONE_CLASS}`, covers the airport: {context.area_sq_mi:.1f} sq mi, "
+        f"{context.pct_of_planned_dev:.0f}% of all Planned Development land in the city "
+        f"and {context.pct_of_ward:.0f}% of Ward {context.ward} by area. It is classified "
+        "correctly -- the zoning ordinance designates land within the Airport Layout Plan "
+        f"the Airport Planned Development -- but it dominates Ward {context.ward}'s "
+        "denominator and deflates every other figure in that row, so that ward is not "
+        f"comparable to the rest on this table. O'Hare falls entirely within Ward "
+        f"{context.ward}; no other ward is affected.\n"
+    )
+
+
 def _legend(categories: list[str]) -> str:
     lines = ["**Zoning codes by column:**"]
     lines += [_LEGEND_LINES[c] for c in categories]
@@ -54,6 +71,7 @@ def format_ward_report(
     citywide: pd.Series,
     categories: list[str] = CATEGORY_ORDER,
     title: str | None = None,
+    notes: list[str] | None = None,
 ) -> str:
     pivot = shares.pivot(index="ward", columns="category", values="pct")
     pivot = pivot.sort_index()[categories]
@@ -73,4 +91,5 @@ def format_ward_report(
 
     table = "\n".join([header, separator, citywide_row, *ward_rows])
     heading = f"# {title}\n\n" if title else ""
-    return f"{heading}{table}\n\n{_legend(categories)}\n"
+    footnotes = "".join(f"\n{note}\n" for note in notes or [])
+    return f"{heading}{table}\n\n{_legend(categories)}\n{footnotes}"

@@ -36,3 +36,7 @@ def categorize(zone_class: str) -> str:
 # The categories where residential is permitted or negotiable. Excludes OTHER,
 # which is the zones that allow no housing at all.
 RESIDENTIAL_CATEGORY_ORDER = [NOT_ALLOWED, ALLOWED, PLANNED_DEV]
+
+# O'Hare. One polygon, correctly a Planned Development under the Airport Planned
+# Development of 1964-01-23, but large enough to dominate ward 41's totals.
+OHARE_ZONE_CLASS = "PD 0"

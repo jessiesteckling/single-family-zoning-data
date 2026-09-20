@@ -7,6 +7,28 @@ Both accept the same query syntax, so `tour` runs the same requests against
 either one.
 
 Run: python3 local_scripts/explore_api.py
+
+Docs
+----
+SoQL query reference, for the $ params used below:
+    https://dev.socrata.com/docs/queries/
+The $order page is where Socrata states that paging without it gives no stable
+row order, which is why the pagination pattern at the bottom passes $order=:id.
+Response formats, .json against .geojson:
+    https://dev.socrata.com/docs/endpoints.html
+App tokens, should these unauthenticated requests start getting throttled:
+    https://dev.socrata.com/docs/app-tokens.html
+
+Column meanings are not in the API docs. Every column of both datasets ships
+with an empty description, so zone_class and zone_type are defined only in the
+zoning ordinance:
+    https://codelibrary.amlegal.com/codes/chicago/latest/chicagozoning_il/0-0-0-48006
+    https://gisapps.cityofchicago.org/zoning/   (official map, for spot checks)
+That is why src/categorize.py has to carry its own prefix table.
+
+Dataset metadata, including when the rows were last updated:
+    https://data.cityofchicago.org/api/views/dj47-wfun.json
+    https://data.cityofchicago.org/api/views/p293-wvbd.json
 """
 
 import json
@@ -14,8 +36,14 @@ import json
 import requests
 
 BASE_URL = "https://data.cityofchicago.org/resource"
-ZONING_DATASET_ID = "dj47-wfun"  # Boundaries - Zoning Districts (current)
-WARDS_DATASET_ID = "p293-wvbd"  # Boundaries - Wards (2023-)
+
+# Boundaries - Zoning Districts (current)
+# https://dev.socrata.com/foundry/data.cityofchicago.org/dj47-wfun
+ZONING_DATASET_ID = "dj47-wfun"
+
+# Boundaries - Wards (2023-)
+# https://dev.socrata.com/foundry/data.cityofchicago.org/p293-wvbd
+WARDS_DATASET_ID = "p293-wvbd"
 
 # Responses are printed for reading, not parsing. Both endpoints return geometry,
 # and one polygon runs to tens of thousands of characters of coordinates, so cap

@@ -3,16 +3,26 @@
 
 Goal: make a chart showing the percentage of land zoned for each use for each ward in Chicago.
 
-Run `python3 main.py` to regenerate the outputs:
+## Results
 
-- [output/ward_zoning_report.md](output/ward_zoning_report.md) — share of all zoned land,
-  four categories.
-- [output/ward_zoning_report_residential.md](output/ward_zoning_report_residential.md) —
-  the same three residential categories renormalized with non-residential zones (M, POS,
-  PMD, T) dropped from the denominator. Better basis for reading a ward's single-family
-  share, since it is not diluted by however much industrial land or parkland the ward holds.
+Checked in and ready to read — no setup, just open them:
 
-The first run downloads to `data/raw/`; later runs read that cache and do not re-fetch.
+- **[Share of all zoned land](output/ward_zoning_report.md)** — one row per ward, four
+  categories.
+- **[Share of residentially zoned land](output/ward_zoning_report_residential.md)** — the
+  same three residential categories renormalized, with zones that allow no housing (M, POS,
+  PMD, T) dropped from the denominator. The better read on a ward's single-family share,
+  since it is not diluted by however much industrial land or parkland the ward happens to
+  hold.
+
+The per-ward numbers behind both:
+[data/processed/ward_zoning_shares.csv](data/processed/ward_zoning_shares.csv).
+
+## Rebuilding
+
+Only needed to pick up new data — the reports above are current as committed.
+`python3 main.py` rewrites both of them and the CSV. Its first run downloads to
+`data/raw/`; later runs read that cache and do not re-fetch.
 
 New to this data? Run `python3 local_scripts/explore_api.py` first — it prints example requests/responses from the Chicago Data Portal API so you can see the raw data shape before it's processed.
 

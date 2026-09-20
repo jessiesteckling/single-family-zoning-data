@@ -20,12 +20,13 @@ and the cached 14,986-feature response rather than live calls.
 |---|---|---|---|
 | A1 | `dj47-wfun` and `p293-wvbd` are the intended datasets | Holds | Confirmed as Zoning Districts (current) and Wards (2023-) |
 | A2 | The "current" dataset holds only live records, one per district | Holds | 0 duplicate `objectid` or `globalid`; `edit_statu`, `zoning_rel`, `override_c`, `case_type` wholly null; `override_r` is `'0'` for all 14,986 rows |
-| A3 | The cached data is current | Holds | Max `edit_date` 2026-08-31, i.e. about three weeks before review. Not guaranteed to stay true — see A6 |
+| A3 | The cached data is current | Holds | Max `edit_date` 2026-08-31. Live row count on 2026-09-20 is still 14,986, matching the cache. Not guaranteed to stay true — see A6 |
 | A4 | Socrata GeoJSON is WGS84 when no `crs` member is present | Holds | RFC 7946 mandates it; geopandas read both files as EPSG:4326 |
-| A5 | `$limit`/`$offset` paging without `$order` returns each row exactly once | **Broken** | Socrata: "The order of the results of a query are not implicitly ordered, so if you're paging, make sure you provide an `$order` clause or at a minimum `$order=:id`." Rows can duplicate or drop across page boundaries. H4 |
+| A5 | `$limit`/`$offset` paging without `$order` returns each row exactly once | Holds in fact, unguaranteed by contract | Tested live 2026-09-20: paging with and without `$order` both returned 14,986 rows, 0 duplicates, identical `objectid` sets, matching `count(*)`. Socrata guarantees no ordering, so this is correct by luck. `$order=:id` costs nothing. H4, downgraded from broken |
 | A6 | A cached file is an acceptable substitute for a fetch | **Broken** as documented | `fetch_geojson` returns the cache unconditionally with no TTL or refresh path, so `README.md:6`'s claim to "fetch the latest data" is false. H6 |
-| A7 | A page shorter than `PAGE_SIZE` means the dataset is exhausted | **Broken** | Any partial page ends the loop and yields a truncated dataset with no warning. No count assertion exists. H5 |
+| A7 | A page shorter than `PAGE_SIZE` means the dataset is exhausted | Held here; unguarded in general | `count(*)` returns 14,986 and the cached file holds exactly 14,986 features, so the download was complete. Any partial page would still end the loop silently, and no assertion would catch it. H5 |
 | A8 | 5,000 is the API's per-request cap | **Broken** | Default `$limit` is 1,000; SODA 2.0 maximum is 50,000; 2.1 and 3.0 have none. 5,000 is self-imposed. L1 |
+| A8b | Plain `.json` returns attributes only, no geometry | **Broken** | Both datasets return geometry as a nested `the_geom` column on `.json`. Separately, `.json` omits null-valued fields per row (zoning: 13 keys returned against 24 `.geojson` properties, 12 null) so one `.json` row under-reports the schema. Both claims were wrong in `explore_api.py`'s comments; corrected there |
 | A9 | The response always contains a `features` key | Caveat | `page["features"]` raises a bare `KeyError` otherwise. `raise_for_status()` caught the 503 seen in review; a 200 with an error body would not be. L3 |
 
 ## B. Coverage and completeness

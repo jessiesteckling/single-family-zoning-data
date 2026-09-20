@@ -98,17 +98,34 @@ legend names it explicitly as an example of zoning where no residential is allow
 
 39 polygons, 0.59 sq mi, 0.26% of land. Low materiality, but a printed false claim.
 
-### H4. Paginated fetch omits `$order`
+### H4. Paginated fetch omits `$order` — latent, does not currently reproduce
 
 `src/fetch_data.py:25-28`
+
+Downgraded to medium severity on 2026-09-20 after live verification. Originally filed as
+high on the strength of Socrata's documentation alone, because the portal was returning
+503 for the whole domain during the first review.
 
 Socrata's documentation: "The order of the results of a query are not implicitly ordered,
 so if you're paging, make sure you provide an `$order` clause or at a minimum
 `$order=:id`. That will guarantee that the order of your results will be stable as you
 page through the dataset."
 
-Without it, rows can be duplicated or skipped across page boundaries. No post-fetch count
-check exists to catch it. Add `&$order=:id`.
+Tested against the live endpoint, paging the zoning dataset both ways, comparing `objectid`
+sets:
+
+| Run | Fetched | Unique | Duplicates |
+|---|---|---|---|
+| No `$order`, as the code does now | 14,986 | 14,986 | 0 |
+| `$order=:id` | 14,986 | 14,986 | 0 |
+
+Both match `$select=count(*)` = 14,986 exactly, and neither run contains a row the other
+lacks. So the committed output is not affected, and no data was lost to this.
+
+It remains worth fixing. The vendor gives no ordering guarantee, so the current behavior is
+correct by luck rather than by contract, and it could break under concurrent writes to the
+dataset or a backend change — silently, since nothing would detect it. `&$order=:id` costs
+nothing.
 
 ### H5. A short page is treated as end-of-data, so truncation is silent
 
@@ -118,8 +135,12 @@ check exists to catch it. Add `&$order=:id`.
 response, a lowered export cap or a partial page ends the loop, and the pipeline then
 produces plausible percentages from a truncated dataset with no warning.
 
-Assert the final feature count against `$select=count(*)` on the same dataset before
-writing the cache.
+Verified 2026-09-20 that this did not bite: `$select=count(*)` returns 14,986 and the
+cached `data/raw/zoning.geojson` holds exactly 14,986 features, so the download was
+complete. The risk is latent, not realised.
+
+Still worth an assertion, since that check is the only thing that would ever surface it.
+Compare the final feature count against `$select=count(*)` before writing the cache.
 
 ### H6. README claims the run fetches current data; it does not
 
@@ -256,7 +277,7 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 
 | ID | Location | Finding |
 |---|---|---|
-| L1 | `local_scripts/explore_api.py:65-66` | Comment claims a request "caps out (5,000 rows/page here)". Socrata's default `$limit` is 1,000; SODA 2.0's maximum is 50,000; 2.1 and 3.0 have none. 5,000 is a self-imposed page size. |
+| L1 | `local_scripts/explore_api.py` | Resolved. The comment claimed a request "caps out (5,000 rows/page here)"; Socrata's default `$limit` is 1,000, SODA 2.0's maximum is 50,000, and 2.1/3.0 have none. Two further claims in that file were also wrong about the API — that plain `.json` returns no geometry, and that one `.json` row shows the schema. All three corrected, and the response print cap is now the named `MAX_PRINT_CHARS` rather than a bare `[:1500]`. |
 | L2 | `main.py:14-16` | CWD-relative paths, so the pipeline only works from the repo root; run elsewhere it silently re-downloads into a new `data/raw`. Anchor to `Path(__file__).parent`. |
 | L3 | `src/fetch_data.py:32` | `page["features"]` raises a bare `KeyError` on an error payload. `raise_for_status()` does catch the 503 seen during review, but a 200 with an error body would not be. |
 | L4 | `src/report.py:19-24` | Category names differ between the CSV (`Apartments & condos not allowed (RS)`) and the report (`Single-Family Only`), so the two artifacts cannot be joined on category without a lookup. |
@@ -272,7 +293,9 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 
 1. H1. Ward 41 is misranked by 28 places on the headline metric. Disclosure, not
    reclassification.
-2. H4 and H5. These govern whether the input is trustworthy at all.
+2. H4 and H5. Neither is realised — both verified clean against the live API on
+   2026-09-20 — but they are the only guards on input integrity, and both fixes are one
+   line.
 3. H2, H3 and M1. Classification errors the report asserts as fact, plus the citywide
    denominator mismatch.
 4. M3, M2, M4 and M5. Denominator and label semantics — cheap to state, and the reason

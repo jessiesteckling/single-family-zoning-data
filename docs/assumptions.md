@@ -64,7 +64,7 @@ and the cached 14,986-feature response rather than live calls.
 | D9 | Unrecognized prefixes belong in "no residential allowed" | **Broken** as a default | The fallthrough is a guess printed as fact; a new or renamed code is absorbed with no signal. M7 |
 | D10 | Base `zone_class` determines what can be built | Caveat, unstated | Ignores the TOD/ETOD ordinance, the 2021 ADU ordinance, ARO, landmark districts and overlays, all of which change buildable density without changing `zone_class`. M6 |
 | D11 | The four categories are exhaustive and mutually exclusive | Holds by construction | Single prefix test with a fallthrough. See D9 for the cost |
-| D12 | The categories reproduce Steven Vance's map (`categorize.py:1-4`) | **Verified** | The map was located and read. Its footnote lists the allowed districts as RT, RM, B, C, DR, DC, DX — exactly `ALLOWED_PREFIXES` — and its four categories match `CATEGORY_ORDER`. Its citywide shares (40.7 / 20.9 / 13.3 / 25.0) sit within 0.8 points of this pipeline's (40.3 / 21.3 / 14.1 / 24.3) four and a half years later. M9 |
+| D12 | The categories reproduce the Chicago Cityscape blog's map (`categorize.py:1-4`) | **Verified** | The map was located and read. Its footnote lists the allowed districts as RT, RM, B, C, DR, DC, DX — exactly `ALLOWED_PREFIXES` — and its four categories match `CATEGORY_ORDER`. Its citywide shares (40.7 / 20.9 / 13.3 / 25.0) sit within 0.8 points of this pipeline's (40.3 / 21.3 / 14.1 / 24.3) four and a half years later. M9 |
 
 ## E. Aggregation and denominator
 
@@ -102,4 +102,5 @@ of what the underlying land supports.
 - [Chicago Zoning Ordinance, chapter 17-2](https://codelibrary.amlegal.com/codes/chicago/latest/chicago_il/0-0-0-2681086)
 - [2nd City Zoning: C3-3](https://secondcityzoning.org/zone/c3-3/), [DS-3](https://secondcityzoning.org/zone/ds-3/), [RS-3](https://secondcityzoning.org/zone/rs-3/), [RT-3.5](https://secondcityzoning.org/zone/rt-3.5/)
 - [Chicago Cityscape: exclusionary zoning](https://help.chicagocityscape.com/exclusionaryzoning)
+- [Chicago Cityscape: How much of Chicago bans apartments?](https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb) — the source of the category breakdown
 - [Chicago Cityscape: O'Hare Airport (ORD) (PD 0)](https://www.chicagocityscape.com/maps/index.php?place=pdchicago-0)

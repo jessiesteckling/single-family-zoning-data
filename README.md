@@ -25,16 +25,16 @@ Neither dataset knows about the other, so a spatial overlay (`src/analyze.py`) i
 
 ## Categories
 
-The four-way breakdown follows Steven Vance's map *Where apartments are allowed in
-Chicago* (May 2022; zoning data as of March 2022; groupings and calculations by the author
-using PostGIS). The prefix groupings in `src/categorize.py` come from it directly — the
-map's own footnote reads "Apartments & condos are allowed in RT, RM, B, C, DR, DC, and DX
+The four-way breakdown follows the map *Where apartments are allowed in Chicago*, from the
+Chicago Cityscape blog post [How much of Chicago bans apartments?](https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb) (May 2022; zoning
+data as of March 2022; groupings and calculations done in PostGIS). The prefix groupings in
+`src/categorize.py` come from it directly — the map's own footnote reads "Apartments & condos are allowed in RT, RM, B, C, DR, DC, and DX
 zoning districts."
 
 Citywide shares track closely four and a half years apart, which is the main external check
 on this pipeline:
 
-| Category | Vance, Mar 2022 | This repo, Sep 2026 |
+| Category | Cityscape, Mar 2022 | This repo, Sep 2026 |
 |---|---|---|
 | Apartments & condos not allowed (RS) | 40.7% | 40.3% |
 | Apartments & condos allowed | 20.9% | 21.3% |
@@ -43,7 +43,12 @@ on this pipeline:
 
 One caveat inherited from the source: grouping every `C` district as apartments-allowed
 includes C3, which permits no housing. That follows the map rather than the zoning
-ordinance. Vance also labels the third category "Unknown which allow residential", which is
-more precise than the bare "Planned Development" used here.
+ordinance.
+
+The map uses the same "Planned Developments" label this report does, paired with a second
+line reading "Unknown which allow residential". The label is an accurate description of the
+zoning — every polygon in the column is a planned development. The gloss is what that means
+for the question being asked, since a PD's residential rules are set per ordinance rather
+than by the district.
 
 This repo (code, analysis, and README) was generated with [Claude Code](https://claude.com/claude-code).

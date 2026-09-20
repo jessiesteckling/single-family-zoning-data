@@ -1,7 +1,9 @@
-"""Group Chicago zone_class codes into the four categories used by Steven
-Vance's map "Where apartments are allowed in Chicago" (May 2022, zoning data as
-of March 2022): whether new apartments/condos are allowed under each district's
-base zoning.
+"""Group Chicago zone_class codes into the four categories used by the Chicago
+Cityscape blog's map "Where apartments are allowed in Chicago" (May 2022, zoning
+data as of March 2022): whether new apartments/condos are allowed under each
+district's base zoning.
+
+Source: https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb
 
 ALLOWED_PREFIXES is that map's own list, per its footnote: "Apartments & condos
 are allowed in RT, RM, B, C, DR, DC, and DX zoning districts." Taking C whole

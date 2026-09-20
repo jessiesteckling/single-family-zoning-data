@@ -22,14 +22,13 @@ from src.report import format_ward_report, ohare_note
 ZONING_DATASET_ID = "dj47-wfun"  # Boundaries - Zoning Districts (current)
 WARDS_DATASET_ID = "p293-wvbd"  # Boundaries - Wards (2023-)
 
-RAW_DIR = Path("data/raw")
 PROCESSED_DIR = Path("data/processed")
 OUTPUT_DIR = Path("output")
 
 
 def main() -> None:
-    zoning = fetch_geojson(ZONING_DATASET_ID, RAW_DIR / "zoning.geojson")
-    wards = fetch_geojson(WARDS_DATASET_ID, RAW_DIR / "wards.geojson")
+    zoning = fetch_geojson(ZONING_DATASET_ID)
+    wards = fetch_geojson(WARDS_DATASET_ID)
 
     shares = compute_ward_category_shares(zoning, wards)
     citywide = compute_citywide_category_shares(zoning)

@@ -144,23 +144,28 @@ nothing.
 response, a lowered export cap or a partial page ends the loop, and the pipeline then
 produces plausible percentages from a truncated dataset with no warning.
 
-Verified 2026-09-20 that this did not bite: `$select=count(*)` returns 14,986 and the
-cached `data/raw/zoning.geojson` holds exactly 14,986 features, so the download was
-complete. The risk is latent, not realised.
+Verified 2026-09-20 that this did not bite: `$select=count(*)` returns 14,986 and a full
+live download yields exactly 14,986 features. The risk is latent, not realised.
 
 Still worth an assertion, since that check is the only thing that would ever surface it.
-Compare the final feature count against `$select=count(*)` before writing the cache.
+Compare the assembled feature count against `$select=count(*)` before returning.
 
-### H6. README claims the run fetches current data; it does not
+### H6. README claims the run fetches current data; it does not — resolved
 
 `README.md:6`, `src/fetch_data.py:19-20`
 
-`fetch_geojson` returns the cache unconditionally when the file exists. There is no TTL,
-no `--refresh` flag and no invalidation path. Because `data/raw/` is gitignored, a clone
-downloads once and never updates again.
+Originally: `fetch_geojson` returned the cache unconditionally when the file existed, with
+no TTL, no `--refresh` flag and no invalidation path, so a clone downloaded once and never
+updated again.
 
-Root cause: `fetch_geojson` conflates HTTP paging, cache management and parsing in one
-function, leaving no seam to force a refresh. See also L10.
+Resolved 2026-09-20 by removing caching outright. `fetch_geojson` now takes only a dataset
+id, downloads on every run and parses in memory via `GeoDataFrame.from_features`; nothing
+is written to or read from disk. `data/raw/` and its gitignore entry are gone. A run costs
+about 12 seconds and 40 MB and requires network access, which is the accepted trade.
+
+Verified the change is behaviour-preserving: all three outputs are byte-identical to the
+committed ones when rebuilt from a live download. This also resolves L10, since the
+function now has one job.
 
 ### H7. The stated deliverable, a chart, does not exist
 
@@ -308,7 +313,7 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 | ID | Location | Finding |
 |---|---|---|
 | L1 | `local_scripts/explore_api.py` | Resolved. The comment claimed a request "caps out (5,000 rows/page here)"; Socrata's default `$limit` is 1,000, SODA 2.0's maximum is 50,000, and 2.1/3.0 have none. Two further claims in that file were also wrong about the API — that plain `.json` returns no geometry, and that one `.json` row shows the schema. All three corrected, and the response print cap is now the named `MAX_PRINT_CHARS` rather than a bare `[:1500]`. |
-| L2 | `main.py:14-16` | CWD-relative paths, so the pipeline only works from the repo root; run elsewhere it silently re-downloads into a new `data/raw`. Anchor to `Path(__file__).parent`. |
+| L2 | `main.py` | `PROCESSED_DIR` and `OUTPUT_DIR` are CWD-relative, so running from anywhere but the repo root writes the CSV and both reports into a new tree rather than updating the committed ones. Anchor to `Path(__file__).parent`. |
 | L3 | `src/fetch_data.py:32` | `page["features"]` raises a bare `KeyError` on an error payload. `raise_for_status()` does catch the 503 seen during review, but a 200 with an error body would not be. |
 | L4 | `src/report.py:19-24` | Category names differ between the CSV (`Apartments & condos not allowed (RS)`) and the report (`Single-Family Only`), so the two artifacts cannot be joined on category without a lookup. |
 | L5 | `src/report.py:42` | `pivot.round(1)` is dead; every value is re-formatted by `f"{v:.1f}%"`. |
@@ -316,7 +321,7 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 | L7 | `src/analyze.py:21,27,64,66` | The `zoning` and `wards` parameters are rebound to reprojected copies. Harmless, since `.copy()` is called, but it obscures that the inputs are untouched. |
 | L8 | `src/analyze.py:12` | `PROJECTED_CRS` is hardcoded in the analysis module while all other configuration lives in `main.py`. |
 | L9 | `src/__pycache__/` | Stale `.pyc` files including `chart.cpython-311.pyc` for a module that does not exist. Untracked; cruft only. |
-| L10 | `src/fetch_data.py:15-41` | `fetch_geojson` conflates HTTP paging, cache management and GeoDataFrame parsing. This is the Single Responsibility point in CLAUDE.md and the root cause of H6. |
+| L10 | `src/fetch_data.py` | Resolved with H6. `fetch_geojson` conflated HTTP paging, cache management and parsing; caching is gone, so it now only pages and parses. |
 | L11 | `src/analyze.py:46-55` | `reindex(fill_value=0)` makes "0% of this category" and "no data for this ward" indistinguishable. Harmless now, since all 50 wards have data. |
 
 ## Suggested fix order

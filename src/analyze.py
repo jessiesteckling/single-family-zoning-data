@@ -70,3 +70,23 @@ def compute_citywide_category_shares(zoning: gpd.GeoDataFrame) -> pd.Series:
     )
     pct = area_by_category / area_by_category.sum() * 100
     return pct.reindex(CATEGORY_ORDER, fill_value=0)
+
+
+def restrict_ward_shares(
+    shares: pd.DataFrame, categories: list[str]
+) -> pd.DataFrame:
+    """Return `shares` limited to `categories`, with each ward's percentages
+    renormalized to sum to 100 across just those categories.
+    """
+    kept = shares[shares["category"].isin(categories)].copy()
+    subtotal = kept.groupby("ward")["pct"].transform("sum")
+    kept["pct"] = kept["pct"].div(subtotal.where(subtotal > 0)).mul(100)
+    return kept
+
+
+def restrict_category_shares(
+    citywide: pd.Series, categories: list[str]
+) -> pd.Series:
+    """Citywide equivalent of `restrict_ward_shares`."""
+    kept = citywide.reindex(categories)
+    return kept / kept.sum() * 100

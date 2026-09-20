@@ -98,6 +98,10 @@ legend names it explicitly as an example of zoning where no residential is allow
 
 39 polygons, 0.59 sq mi, 0.26% of land. Low materiality, but a printed false claim.
 
+Partly addressed: `DS` has been dropped from the legend's list of no-residential examples,
+so the report no longer asserts it. The classification itself is unchanged — `DS` still
+falls through to `OTHER` — so this stays open.
+
 ### H4. Paginated fetch omits `$order` — latent, does not currently reproduce
 
 `src/fetch_data.py:25-28`
@@ -198,6 +202,13 @@ The denominator is all zoned land. POS alone is 7.60% (17.59 sq mi), O'Hare a fu
 
 The figure usually quoted in this debate is the share of residential land, which this same
 data gives as 78.5%. Both are legitimate. The report must state which one it shows.
+
+Partly addressed: `output/ward_zoning_report_residential.md` now reports the three
+residential categories renormalized with M, POS, PMD and T dropped, and states its basis in
+the legend. Citywide single-family reads 53.3% on that basis against 40.3% on all land. Note
+the residential table still keeps PD in the denominator, so Ward 41 is still 68.0% planned
+development there and its single-family share still reads 27.7% rather than the 67.8% its
+non-airport land supports. H1 is unaffected by this change.
 
 ### M4. River surface water is counted as land, including as RS
 

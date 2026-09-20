@@ -56,4 +56,4 @@
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
 - Apartments Allowed: B, C, DC, DR, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
-- Other: everything else (e.g. M, POS, PMD, T, DS) -- no residential allowed
+- Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed

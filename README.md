@@ -3,7 +3,16 @@
 
 Goal: make a chart showing the percentage of land zoned for each use for each ward in Chicago.
 
-Run `python3 main.py` to fetch the latest data and regenerate the output: [output/ward_zoning_report.md](output/ward_zoning_report.md).
+Run `python3 main.py` to regenerate the outputs:
+
+- [output/ward_zoning_report.md](output/ward_zoning_report.md) — share of all zoned land,
+  four categories.
+- [output/ward_zoning_report_residential.md](output/ward_zoning_report_residential.md) —
+  the same three residential categories renormalized with non-residential zones (M, POS,
+  PMD, T) dropped from the denominator. Better basis for reading a ward's single-family
+  share, since it is not diluted by however much industrial land or parkland the ward holds.
+
+The first run downloads to `data/raw/`; later runs read that cache and do not re-fetch.
 
 New to this data? Run `python3 local_scripts/explore_api.py` first — it prints example requests/responses from the Chicago Data Portal API so you can see the raw data shape before it's processed.
 

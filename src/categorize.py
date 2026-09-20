@@ -32,3 +32,7 @@ def categorize(zone_class: str) -> str:
     if prefix in ALLOWED_PREFIXES:
         return ALLOWED
     return OTHER
+
+# The categories where residential is permitted or negotiable. Excludes OTHER,
+# which is the zones that allow no housing at all.
+RESIDENTIAL_CATEGORY_ORDER = [NOT_ALLOWED, ALLOWED, PLANNED_DEV]

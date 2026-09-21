@@ -77,8 +77,8 @@ def rescale_ward_shares_to(
     """Rewrite each ward's percentages as shares of `categories` alone.
 
     Drops the categories left out -- in practice "All other zones", the fourth
-    column of the all-land report -- then scales what remains back up to 100,
-    which is what turns that report into the residential one.
+    column of the all-land report -- then scales what remains back up to 100.
+    The residential report is its only caller.
     """
     kept = shares[shares["category"].isin(categories)].copy()
 
@@ -96,8 +96,9 @@ def rescale_ward_shares_to(
 def rescale_category_shares_to(
     citywide: pd.Series, categories: list[str]
 ) -> pd.Series:
-    """Rescale the citywide percentages the same way, for the All Chicago row
-    of the residential report.
+    """Rescale the citywide percentages the same way, for the All Chicago row.
+
+    Like its ward counterpart, only the residential report calls it.
     """
     kept = citywide.reindex(categories)
     return kept / kept.sum() * 100

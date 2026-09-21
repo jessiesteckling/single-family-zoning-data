@@ -197,14 +197,16 @@ open water counted as single-family land.
 Lake Michigan is correctly excluded, being neither zoned nor inside any ward.
 
 Disclosed rather than fixed, deliberately. Both legends now say water inside a district
-counts toward its area and name all three cases found here: the Chicago River at Wolf
-Point inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside
-an `RS-3` polygon. All three were re-verified against live data on 2026-09-21. Subtracting it would need a hydrography layer, and the City's
-Waterways dataset (`eg9f-z3t6`) cannot supply one through the API: all 605 rows come back
-with no geometry and no properties, the shapes being a shapefile attachment on the dataset
-page. Using it would mean committing a downloaded file, which gives up the property that
-every run fetches fresh. An outside source such as the USGS National Hydrography Dataset
-would be a second data vintage.
+counts toward its area and name all three cases found here, Bubbly Creek included since
+open water counted as single-family land is the one worth seeing. All three were
+re-verified by point-in-polygon against live data on 2026-09-21 before being published.
+
+Subtracting the water would need a hydrography layer, and the City's Waterways dataset
+(`eg9f-z3t6`) cannot supply one through the API: all 605 rows come back with no geometry
+and no properties, the shapes being a shapefile attachment on the dataset page. Using it
+would mean committing a downloaded file, which gives up the property that every run
+fetches fresh. An outside source such as the USGS National Hydrography Dataset would be a
+second data vintage.
 
 The size of the effect is unmeasured for the same reason. The Chicago River system inside
 the city is on the order of 1 sq mi against 231, so well under 1% citywide, but it would

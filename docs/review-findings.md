@@ -37,58 +37,19 @@ These were tested and hold. Listed so they are not re-litigated.
 - `RT-3.5` in the apartments-allowed bucket is correct; it permits two-flats, townhouses
   and low-density apartment buildings.
 - Wards 34 and 42 at 0.0% RS are genuine, not a division artifact.
+- Ward 41's 63.8% Planned Development is correct, not a defect. `PD 0` is O'Hare — one
+  polygon of 10.32 sq mi containing the FAA reference point, Terminal 2 and the 10L/28R
+  runway midpoint — and it is a genuine planned development under the Airport Planned
+  Development of 1964-01-23. Every figure in that row is right. The airport is simply 61.7%
+  of the ward, which leaves its single-family share reading 26.0% against the 67.8% its
+  non-airport land supports, 34th of 50 rather than 6th. Both reports footnote it. Moving
+  `PD 0` to `OTHER` would be less accurate, not more.
 - `zone_type` was evaluated as a replacement for regex prefix matching and rejected. It is
   not a use taxonomy: `zone_type=1` mixes B, C, DS, PD, RM, RT and `zone_type=4` mixes
   B, C, DR, RM, RS, RT. Prefix matching on `zone_class` is the correct approach.
 
 ## High
 
-### H1. O'Hare puts Ward 41 in the wrong half of the chart
-
-`src/categorize.py`, `src/report.py`
-
-One polygon carries `zone_class = "PD 0"`, `pd_num = 0`, `case_numbe = 0`, covering
-10.32 sq mi (6,604 acres). It contains the FAA airport reference point, Terminal 2 and the
-10L/28R runway midpoint, and excludes Rosemont and Norridge: it is O'Hare. Chicago
-Cityscape independently labels this record "O'Hare Airport (ORD) (PD 0)".
-
-The classification is correct and must not be changed. O'Hare is genuinely a planned
-development — the "Airport Planned Development" of City Council ordinance 1964-01-23, and
-the zoning ordinance provides that land within the Airport Layout Plan "shall be deemed to
-be included within, and subject to all the applicable provisions of" it.
-
-The defect is that the airport is 61.7% of Ward 41's denominator, which moves every figure
-in that row:
-
-| Ward 41 | As published | Excluding `PD 0` |
-|---|---|---|
-| Single-family only | 26.0% | 67.8% |
-| Apartments allowed | 4.0% | 10.5% |
-| Planned development | 63.8% | 5.6% |
-| Other | 6.2% | 16.1% |
-
-Single-family rank moves from **34th of 50 to 6th of 50**. As published, Ward 41 sits
-beside Ward 49 (25.2%), Ward 11 (27.0%) and Ward 48 (27.1%) — Rogers Park, Bridgeport,
-Edgewater. On its developable land it sits beside Ward 23 (67.8%), Ward 31 (68.8%) and
-Ward 45 (70.2%) — the bungalow belt, which is what Edison Park and Norwood Park are. A
-reader comparing wards draws the opposite conclusion from the truth.
-
-This is confined to one ward. `PD 0` is 61.7% of Ward 41; the next-largest single-PD
-concentration anywhere is `PD 610` at 23.0% of Ward 13, then `PD 43` at 12.0% of Ward 5.
-Nothing else distorts a row.
-
-Addressed by footnote. Both reports now carry a plain-language note saying most of Ward 41
-is the airport and that the ward is not comparable to the others. It deliberately quotes no
-figures — the measurements above stay here rather than in the output. `PD 0` was not moved
-to `OTHER`, which would be less accurate than current behaviour.
-
-Because the note quotes no figures, nothing computes them: the area and share arithmetic
-behind it was deleted, along with `OHARE_ZONE_CLASS` and `SQ_FEET_PER_SQ_MILE`, whose only
-caller it was. The evidence for those numbers lives here instead.
-
-The ranking problem itself is unfixed and unfixable by a footnote: Ward 41 still sorts 34th
-on single-family share. The citywide row is a weaker case — 32% of that column being one
-airport is worth knowing, but it misranks nothing.
 ### H2. `C3` is classified as apartments-allowed; C3 permits no housing
 
 `src/categorize.py`
@@ -221,7 +182,7 @@ residential categories renormalized with M, POS, PMD and T dropped, and states i
 the legend. Citywide single-family reads 53.3% on that basis against 40.3% on all land. Note
 the residential table still keeps PD in the denominator, so Ward 41 is still 68.0% planned
 development there and its single-family share still reads 27.7% rather than the 67.8% its
-non-airport land supports. H1 is unaffected by this change.
+non-airport land supports. The residential table does not change that.
 
 ### M4. River surface water is counted as land, including as RS
 
@@ -334,17 +295,14 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 
 ## Suggested fix order
 
-1. H1. Ward 41 is misranked by 28 places on the headline metric. Disclosure, not
-   reclassification.
-2. H4 and H5. Neither is realised — both verified clean against the live API on
+1. H4 and H5. Neither is realised — both verified clean against the live API on
    2026-09-20 — but they are the only guards on input integrity, and both fixes are one
    line.
-3. H2 and M1. The remaining classification error the report asserts as fact, plus the
-   citywide denominator mismatch.
-4. M3, M2, M4 and M5. Denominator and label semantics — cheap to state, and the reason
+2. H2 and M1. The one remaining classification error the report asserts as fact, plus the
+   citywide row not aggregating the table beneath it.
+3. M3, M2, M4 and M5. Denominator and label semantics — cheap to state, and the reason
    40.3% is easy to misread.
-5. M10. Tests for `categorize` pinning each prefix to its expected bucket.
-6. H7 is a scope decision. The repo's stated goal is a chart.
+4. H7 is a scope decision. The repo's stated goal is a chart.
 
 ## References
 

@@ -85,9 +85,11 @@ independent sources. The exposure is concentrated in two places:
    is silently out of it (unzoned gaps, unevenly by ward), and which basis the headline
    percentage uses (E5, B4, C3, M1).
 
-Nothing found changes the committed numbers. The numbers are what the code says they are.
-The exposure is that one row (Ward 41) and one headline percentage (E5) read as the opposite
-of what the underlying land supports.
+Nothing found changes the committed numbers, and the one row that looks wrong is not. Ward
+41 reads as barely single-family because most of it is O'Hare, which is correctly zoned and
+correctly measured; both reports footnote it. The real exposure is the headline percentage
+(E5), which is a share of all zoned land where a reader is likely to assume residential
+land, and the two classification errors under D6 and D7.
 
 ## References
 

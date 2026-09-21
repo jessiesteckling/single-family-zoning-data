@@ -57,11 +57,10 @@ against the live API on 2026-09-20.
 | D4 | "Single-Family Only" is an accurate label for RS | Caveat, overstates | RS-3 permits two-flats at 2,500 sq ft per unit, so on a 5,000 sq ft lot, or 1,500 sq ft per unit under the 17-2-0303-B block-context reduction. RS-2 and RS-3 have permitted ADUs since 2021. The CSV's own `Apartments & condos not allowed (RS)` is the accurate wording. M5 |
 | D5 | `RT-3.5` allows apartments | Holds | Permits two-flats, townhouses and low-density apartment buildings |
 | D6 | All `C*` districts allow apartments | **Broken**, but inherited | C3 (Commercial, Manufacturing and Employment) permits no housing; it is a buffer against residential encroachment beside M and PMD districts. C1 and C2 do permit units above the ground floor. 77 polygons, 0.16% of land. The source map groups `C` whole, so the code is faithful to its citation; correcting it means diverging from the source deliberately. H2 |
-| D7 | `DS` allows no residential | **Broken**, and inherited | Downtown Service carries a residential density standard (400 sq ft per unit, 300 efficiency, 200 SRO) and a 30 ft setback for floors containing dwelling units, so it does permit housing. `DS` is absent from the source map's allowed list too, so the code is faithful to its citation; correcting it means diverging from the source, as with D6 in the opposite direction. H3 |
-| D8 | Unrecognized prefixes belong in "no residential allowed" | **Broken** as a default | The fallthrough is a guess printed as fact; a new or renamed code is absorbed with no signal. M7 |
-| D9 | Base `zone_class` determines what can be built | Caveat, unstated | Ignores the TOD/ETOD ordinance, the 2021 ADU ordinance, ARO, landmark districts and overlays, all of which change buildable density without changing `zone_class`. M6 |
-| D10 | The four categories are exhaustive and mutually exclusive | Holds by construction | Single prefix test with a fallthrough. See D9 for the cost |
-| D11 | The categories reproduce the Chicago Cityscape blog's map (`categorize.py`) | **Verified** | The map was located and read. Its footnote lists the allowed districts as RT, RM, B, C, DR, DC, DX — exactly `ALLOWED_PREFIXES` — and its four categories match `CATEGORY_ORDER`. Its citywide shares (40.7 / 20.9 / 13.3 / 25.0) sit within 0.8 points of this pipeline's (40.3 / 21.3 / 14.1 / 24.3) four and a half years later. M9 |
+| D7 | Unrecognized prefixes belong in "no residential allowed" | **Broken** as a default | The fallthrough is a guess printed as fact; a new or renamed code is absorbed with no signal. M7 |
+| D8 | Base `zone_class` determines what can be built | Caveat, unstated | Ignores the TOD/ETOD ordinance, the 2021 ADU ordinance, ARO, landmark districts and overlays, all of which change buildable density without changing `zone_class`. M6 |
+| D9 | The four categories are exhaustive and mutually exclusive | Holds by construction | Single prefix test with a fallthrough. See D9 for the cost |
+| D10 | The categories reproduce the Chicago Cityscape blog's map (`categorize.py`) | Verified, with one deliberate departure | The map was located and read. Its four categories match `CATEGORY_ORDER`, and its footnote lists the allowed districts as RT, RM, B, C, DR, DC, DX — which was `ALLOWED_PREFIXES` exactly until `DS` was added on the ordinance's authority. Its citywide shares (40.7 / 20.9 / 13.3 / 25.0) sit within 0.8 points of this pipeline's four and a half years later. M9 |
 
 ## E. Aggregation and denominator
 
@@ -79,9 +78,9 @@ against the live API on 2026-09-20.
 Geometry, projection, overlay and arithmetic assumptions hold, several verified against
 independent sources. The exposure is concentrated in two places:
 
-1. **Classification** — C3 and DS are wrong against the ordinance (D6, D7), the fallthrough
-   default is a guess (D8), the RS label overstates (D4), and only base zoning is modeled
-   (D9).
+1. **Classification** — C3 is still wrong against the ordinance (D6), the fallthrough
+   default is a guess (D7), the RS label overstates (D4), and only base zoning is modeled
+   (D8).
 2. **Unstated denominator semantics** — what is in it (parks, airport, river water), what
    is silently out of it (unzoned gaps, unevenly by ward), and which basis the headline
    percentage uses (E5, B4, C3, M1).

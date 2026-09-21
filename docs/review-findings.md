@@ -100,33 +100,15 @@ ground floor; C3 permits none. The blanket `"C"` prefix catches all three.
 77 polygons, 0.38 sq mi, 0.16% of city land. Small in area, but wrong, and `_legend()`
 advertises `C` wholesale so the report states it as fact.
 
-Reclassified as inherited, not a transcription slip: the source map groups every `C`
-district as apartments-allowed, so the code is faithful to what it cites. Fixing it means
-deliberately diverging from the source, which is a choice to make explicitly rather than
-silently. Noted as a caveat in the README in the meantime.
+Inherited, not a transcription slip: the source map groups every `C` district as
+apartments-allowed, so the code is faithful to what it cites. Fixing it means deliberately
+diverging from the source, which is a choice to make explicitly rather than silently. The
+README carries it as a caveat in the meantime.
 
-### H3. `DS` is reported as no-residential; DS permits dwelling units
-
-`src/report.py`
-
-Downtown Service districts carry a residential density standard (400 sq ft per dwelling
-unit, 300 for efficiency, 200 for SRO) and a 30 ft setback for floors containing dwelling
-units. `DS` is absent from `ALLOWED_PREFIXES` so it falls through to `OTHER`, and the
-legend names it explicitly as an example of zoning where no residential is allowed.
-
-39 polygons, 0.59 sq mi, 0.26% of land. Low materiality, but a printed false claim.
-
-Inherited, like H2, not a transcription slip. The source map's footnote lists the
-apartments-allowed districts as "RT, RM, B, C, DR, DC, and DX" — `DS` is absent, so the
-code reproduces the map faithfully. The map and the ordinance disagree here.
-
-Taken together with H2, the source diverges from the ordinance in both directions and by
-similar amounts: C3 counted as allowing apartments when it allows no housing (0.16% of
-land), and DS counted as allowing nothing when it permits dwelling units (0.26%). Fixing
-either means deliberately departing from the cited source.
-
-Partly addressed: `DS` has been dropped from the legend's list of no-residential examples,
-so the report no longer asserts it in print. The classification is unchanged.
+The mirror case, `DS`, was fixed: the map omits it but the ordinance permits housing there,
+so `DS` was added to `ALLOWED_PREFIXES`. C3 is left alone because the two depart in
+opposite directions and correcting only one moves the totals further from the source, not
+closer.
 
 ### H4. Paginated fetch omits `$order` — latent, does not currently reproduce
 
@@ -295,9 +277,9 @@ invalid input as the data changes, and an ignored warning will hide the next rea
 `src/categorize.py`
 
 Resolved 2026-09-20. The map itself was located and read. Its footnote states "Apartments
-& condos are allowed in RT, RM, B, C, DR, DC, and DX zoning districts", which is exactly
-`ALLOWED_PREFIXES`, and its four categories match `CATEGORY_ORDER`. The code is a faithful
-transcription. Attribution with date and data vintage is now in the README and the module
+& condos are allowed in RT, RM, B, C, DR, DC, and DX zoning districts", and its four
+categories match `CATEGORY_ORDER`. That was exactly `ALLOWED_PREFIXES` as first written;
+`DS` has since been added deliberately, following the ordinance where the map omits it. Attribution with date and data vintage is now in the README and the module
 docstring.
 
 The map is also the strongest external check on the pipeline. Citywide shares, four and a
@@ -357,8 +339,8 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 2. H4 and H5. Neither is realised — both verified clean against the live API on
    2026-09-20 — but they are the only guards on input integrity, and both fixes are one
    line.
-3. H2, H3 and M1. Classification errors the report asserts as fact, plus the citywide
-   denominator mismatch.
+3. H2 and M1. The remaining classification error the report asserts as fact, plus the
+   citywide denominator mismatch.
 4. M3, M2, M4 and M5. Denominator and label semantics — cheap to state, and the reason
    40.3% is easy to misread.
 5. M10. Tests for `categorize` pinning each prefix to its expected bucket.

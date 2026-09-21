@@ -44,13 +44,15 @@ Chicago Cityscape blog post [Apartments & condos are banned in most of Chicago](
 data as of March 2022; groupings and calculations done in PostGIS).
 
 - Apartments & condos not allowed (RS)
-- Apartments & condos allowed (RT, RM, B, C*, DR, DX)
+- Apartments & condos allowed (RT, RM, B, C*, DC, DR, DS***, DX)
 - Planned Developments (PD**)
 - All other zones, no residential allowed
 
 \* Technically, C3 (a subset of C) doesn't allow residential, but that's an extremely small total land area
 
 \** O'Hare is a Planned Development which significantly impacts the ward 41 numbers
+
+\*** DS is included though the source map leaves it out — the zoning ordinance allows housing there
 
 
 ## Methods

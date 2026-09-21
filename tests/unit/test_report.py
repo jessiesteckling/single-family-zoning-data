@@ -24,7 +24,7 @@ EXPECTED_ALL_LAND_REPORT = """\
 
 **Zoning codes by column:**
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
-- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Apartments Allowed: B, C, DC, DR, DS, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
 """
@@ -38,7 +38,7 @@ EXPECTED_RESIDENTIAL_REPORT = """\
 
 **Zoning codes by column:**
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
-- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Apartments Allowed: B, C, DC, DR, DS, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
 
 Percentages are shares of land where residential is permitted or negotiable. \

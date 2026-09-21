@@ -8,13 +8,13 @@ ward,category,pct
 2,Planned Developments,36.17183113872902
 2,All other zones (no residential allowed),8.169609897418622
 3,Apartments & condos not allowed (RS),2.8583826394636276
-3,Apartments & condos allowed,54.496691866198645
+3,Apartments & condos allowed,56.85911280407937
 3,Planned Developments,29.760290996540313
-3,All other zones (no residential allowed),12.884634497797412
+3,All other zones (no residential allowed),10.522213559916686
 4,Apartments & condos not allowed (RS),5.641737315115926
-4,Apartments & condos allowed,36.2128040758273
+4,Apartments & condos allowed,36.28595669206201
 4,Planned Developments,36.18447134382687
-4,All other zones (no residential allowed),21.960987265229903
+4,All other zones (no residential allowed),21.88783464899519
 5,Apartments & condos not allowed (RS),11.357275023477651
 5,Apartments & condos allowed,39.24760424103129
 5,Planned Developments,19.11195949797913
@@ -40,9 +40,9 @@ ward,category,pct
 10,Planned Developments,9.78674299333817
 10,All other zones (no residential allowed),64.97124389268507
 11,Apartments & condos not allowed (RS),27.044704585417623
-11,Apartments & condos allowed,17.65453965181052
+11,Apartments & condos allowed,17.96577030315865
 11,Planned Developments,8.846315897252657
-11,All other zones (no residential allowed),46.45443986551919
+11,All other zones (no residential allowed),46.143209214171065
 12,Apartments & condos not allowed (RS),31.416287781058262
 12,Apartments & condos allowed,10.656132839453159
 12,Planned Developments,8.483686165360634
@@ -96,21 +96,21 @@ ward,category,pct
 24,Planned Developments,10.984489670888799
 24,All other zones (no residential allowed),27.948022412382713
 25,Apartments & condos not allowed (RS),4.925477028494735
-25,Apartments & condos allowed,42.459736286426484
+25,Apartments & condos allowed,42.854927644222215
 25,Planned Developments,14.01182333770753
-25,All other zones (no residential allowed),38.60296334737125
+25,All other zones (no residential allowed),38.20777198957552
 26,Apartments & condos not allowed (RS),55.99451120355571
 26,Apartments & condos allowed,18.785439686575042
 26,Planned Developments,4.5148466604059685
 26,All other zones (no residential allowed),20.705202449463282
 27,Apartments & condos not allowed (RS),6.579262539909822
-27,Apartments & condos allowed,33.133086711984674
+27,Apartments & condos allowed,34.1365997023488
 27,Planned Developments,27.618373044982565
-27,All other zones (no residential allowed),32.66927770312294
-28,Apartments & condos not allowed (RS),4.601872669437475
-28,Apartments & condos allowed,39.18134298079533
-28,Planned Developments,22.54895379719742
-28,All other zones (no residential allowed),33.667830552569775
+27,All other zones (no residential allowed),31.665764712758808
+28,Apartments & condos not allowed (RS),4.6018726694374745
+28,Apartments & condos allowed,44.719708074030166
+28,Planned Developments,22.548953797197417
+28,All other zones (no residential allowed),28.129465459334934
 29,Apartments & condos not allowed (RS),52.729892907707885
 29,Apartments & condos allowed,20.225524416308232
 29,Planned Developments,4.23864612513128
@@ -132,9 +132,9 @@ ward,category,pct
 33,Planned Developments,4.862302235203639
 33,All other zones (no residential allowed),6.718987105955865
 34,Apartments & condos not allowed (RS),0.0
-34,Apartments & condos allowed,58.201475862901205
+34,Apartments & condos allowed,64.29198169326526
 34,Planned Developments,30.242510013815743
-34,All other zones (no residential allowed),11.556014123283049
+34,All other zones (no residential allowed),5.465508292919005
 35,Apartments & condos not allowed (RS),60.13387312500333
 35,Apartments & condos allowed,20.38887097465713
 35,Planned Developments,4.962478021226446
@@ -164,9 +164,9 @@ ward,category,pct
 41,Planned Developments,63.8270641103388
 41,All other zones (no residential allowed),6.177920916775423
 42,Apartments & condos not allowed (RS),0.0
-42,Apartments & condos allowed,32.98668387257393
+42,Apartments & condos allowed,33.62051367499269
 42,Planned Developments,46.68196635719253
-42,All other zones (no residential allowed),20.331349770233544
+42,All other zones (no residential allowed),19.69751996781478
 43,Apartments & condos not allowed (RS),0.32661730716710363
 43,Apartments & condos allowed,56.995315953974504
 43,Planned Developments,11.203417129737574

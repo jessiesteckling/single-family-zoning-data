@@ -294,9 +294,14 @@ changes would predict.
 
 ### M10. No tests
 
-CLAUDE.md asks for "small, testable functions for data transformations ... so they can be
-verified independently of the chart output". `categorize` and the share arithmetic are pure
-and trivially coverable. No test directory exists.
+Originally: no test directory existed, though CLAUDE.md asks for "small, testable functions
+for data transformations ... so they can be verified independently of the chart output".
+
+Resolved: `tests/unit/` holds 29 tests over mock portal responses, run with
+`python3 -m unittest discover -s tests -t .` and verified to pass with sockets disabled.
+The fixtures are a two-ward toy city whose middle district straddles the ward line, so the
+overlay's defining behaviour — splitting a district between the wards it falls in rather
+than assigning it to one — is asserted directly.
 
 ### M11. No dependency manifest — resolved
 

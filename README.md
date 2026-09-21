@@ -25,6 +25,9 @@ Only needed to pick up new data — the reports above are current as committed.
 the portal every run — about 40 MB, roughly 12 seconds all in — and caches nothing, so a
 run always reflects the portal's current state. It needs network access.
 
+Tests: `python3 -m unittest discover -s tests -t .` — 29 unit tests over mock portal
+responses, no network required.
+
 New to this data? Run `python3 local_scripts/explore_api.py` first — it prints example requests/responses from the Chicago Data Portal API so you can see the raw data shape before it's processed.
 
 ## Data sources

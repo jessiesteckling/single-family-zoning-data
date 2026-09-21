@@ -5,7 +5,6 @@ import unittest
 import geopandas as gpd
 
 from src.analyze import (
-    OhareContext,
     compute_citywide_category_shares,
     compute_ward_category_shares,
     rescale_category_shares_to,
@@ -48,14 +47,10 @@ so a ward's figures here are higher than in the all-land table.
 """
 
 EXPECTED_OHARE_NOTE = (
-    "**Ward 7 and O'Hare.** One polygon, zone_class `PD 0`, covers the airport: "
-    "10.3 sq mi, 32% of all Planned Development land in the city and 60% of "
-    "Ward 7 by area. It is classified correctly -- the zoning ordinance "
-    "designates land within the Airport Layout Plan the Airport Planned "
-    "Development -- but it dominates Ward 7's denominator and deflates every "
-    "other figure in that row, so that ward is not comparable to the rest on "
-    "this table. O'Hare falls entirely within Ward 7; no other ward is "
-    "affected.\n"
+    "**Ward 7 and O'Hare.** Most of Ward 7 is taken up by O'Hare Airport, which "
+    "is zoned as a planned development. That pushes the ward's Planned "
+    "Development figure up and its other figures down, so Ward 7 is not really "
+    "comparable to the other wards in this table.\n"
 )
 
 
@@ -95,13 +90,8 @@ class ReportTests(unittest.TestCase):
 
 
 class FootnoteTests(unittest.TestCase):
-    def test_every_figure_in_the_note_comes_from_the_context(self):
-        note = ohare_note(
-            OhareContext(
-                ward=7, area_sq_mi=10.32, pct_of_planned_dev=32.0, pct_of_ward=60.0
-            )
-        )
-        self.assertEqual(note, EXPECTED_OHARE_NOTE)
+    def test_the_note_names_the_ward_it_is_given(self):
+        self.assertEqual(ohare_note(7), EXPECTED_OHARE_NOTE)
 
 
 if __name__ == "__main__":

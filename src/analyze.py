@@ -2,13 +2,11 @@
 into each apartment-allowed category.
 """
 
-from typing import NamedTuple
-
 import geopandas as gpd
 import pandas as pd
 
-from .categorize import CATEGORY_ORDER, PLANNED_DEV, categorize
-from .constants import OHARE_ZONE_CLASS, PROJECTED_CRS, SQ_FEET_PER_SQ_MILE
+from .categorize import CATEGORY_ORDER, categorize
+from .constants import OHARE_ZONE_CLASS, PROJECTED_CRS
 
 
 def compute_ward_category_shares(
@@ -104,35 +102,14 @@ def rescale_category_shares_to(
     return kept / kept.sum() * 100
 
 
-class OhareContext(NamedTuple):
-    """Where O'Hare sits, for the footnote both reports carry."""
-
-    ward: int
-    area_sq_mi: float
-    pct_of_planned_dev: float
-    pct_of_ward: float
-
-
-def compute_ohare_context(
-    zoning: gpd.GeoDataFrame, wards: gpd.GeoDataFrame
-) -> OhareContext:
+def find_ohare_ward(zoning: gpd.GeoDataFrame, wards: gpd.GeoDataFrame) -> int:
+    """The ward O'Hare sits in, so the footnote can name it rather than hardcode it."""
     zoning = zoning[["zone_class", "geometry"]].to_crs(PROJECTED_CRS)
     wards = wards[["ward", "geometry"]].copy()
     wards["ward"] = wards["ward"].astype(int)
     wards = wards.to_crs(PROJECTED_CRS)
 
-    area_sq_ft = zoning.geometry.area
-    is_ohare = zoning["zone_class"] == OHARE_ZONE_CLASS
-    ohare_sq_ft = area_sq_ft[is_ohare].sum()
-    planned_sq_ft = area_sq_ft[zoning["zone_class"].apply(categorize) == PLANNED_DEV].sum()
-
-    in_wards = gpd.overlay(zoning[is_ohare], wards, how="intersection")
-    host = int(in_wards.assign(area=in_wards.geometry.area).groupby("ward")["area"].sum().idxmax())
-    host_sq_ft = wards.loc[wards["ward"] == host, "geometry"].area.sum()
-
-    return OhareContext(
-        ward=host,
-        area_sq_mi=ohare_sq_ft / SQ_FEET_PER_SQ_MILE,
-        pct_of_planned_dev=ohare_sq_ft / planned_sq_ft * 100,
-        pct_of_ward=ohare_sq_ft / host_sq_ft * 100,
-    )
+    ohare = zoning[zoning["zone_class"] == OHARE_ZONE_CLASS]
+    in_wards = gpd.overlay(ohare, wards, how="intersection")
+    area_sq_ft = in_wards.assign(area=in_wards.geometry.area)
+    return int(area_sq_ft.groupby("ward")["area"].sum().idxmax())

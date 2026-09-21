@@ -10,7 +10,7 @@ from pathlib import Path
 
 from src.analyze import (
     compute_citywide_category_shares,
-    compute_ohare_context,
+    find_ohare_ward,
     compute_ward_category_shares,
     rescale_category_shares_to,
     rescale_ward_shares_to,
@@ -32,7 +32,7 @@ def main() -> None:
     ward_pct = compute_ward_category_shares(zoning, wards)
     citywide_pct = compute_citywide_category_shares(zoning)
 
-    notes = [ohare_note(compute_ohare_context(zoning, wards))]
+    notes = [ohare_note(find_ohare_ward(zoning, wards))]
 
     # The residential report is the same table rescaled, not a second analysis:
     # drop the "Other" column and renormalise the remaining three to 100.

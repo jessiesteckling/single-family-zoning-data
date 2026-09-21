@@ -58,5 +58,5 @@
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
 
-**Ward 41 and O'Hare.** One polygon, zone_class `PD 0`, covers the airport: 10.3 sq mi, 32% of all Planned Development land in the city and 60% of Ward 41 by area. It is classified correctly -- the zoning ordinance designates land within the Airport Layout Plan the Airport Planned Development -- but it dominates Ward 41's denominator and deflates every other figure in that row, so that ward is not comparable to the rest on this table. O'Hare falls entirely within Ward 41; no other ward is affected.
+**Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, which is zoned as a planned development. That pushes the ward's Planned Development figure up and its other figures down, so Ward 41 is not really comparable to the other wards in this table.
 

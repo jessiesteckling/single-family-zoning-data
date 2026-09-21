@@ -9,7 +9,6 @@ residential-only one.
 
 import pandas as pd
 
-from .analyze import OhareContext
 from .categorize import (
     ALLOWED,
     ALLOWED_PREFIXES,
@@ -20,7 +19,6 @@ from .categorize import (
     PLANNED_DEV,
     PLANNED_DEV_PREFIXES,
 )
-from .constants import OHARE_ZONE_CLASS
 
 _COLUMN_LABELS = {
     NOT_ALLOWED: "Single-Family Only",
@@ -43,18 +41,13 @@ _EXCLUDED_NOTE = (
 )
 
 
-def ohare_note(context: OhareContext) -> str:
-    """Footnote for the Planned Development column, which O'Hare dominates."""
+def ohare_note(ward: int) -> str:
+    """Footnote warning that one ward is mostly an airport."""
     return (
-        f"**Ward {context.ward} and O'Hare.** One polygon, zone_class "
-        f"`{OHARE_ZONE_CLASS}`, covers the airport: {context.area_sq_mi:.1f} sq mi, "
-        f"{context.pct_of_planned_dev:.0f}% of all Planned Development land in the city "
-        f"and {context.pct_of_ward:.0f}% of Ward {context.ward} by area. It is classified "
-        "correctly -- the zoning ordinance designates land within the Airport Layout Plan "
-        f"the Airport Planned Development -- but it dominates Ward {context.ward}'s "
-        "denominator and deflates every other figure in that row, so that ward is not "
-        f"comparable to the rest on this table. O'Hare falls entirely within Ward "
-        f"{context.ward}; no other ward is affected.\n"
+        f"**Ward {ward} and O'Hare.** Most of Ward {ward} is taken up by O'Hare "
+        "Airport, which is zoned as a planned development. That pushes the ward's "
+        "Planned Development figure up and its other figures down, so Ward "
+        f"{ward} is not really comparable to the other wards in this table.\n"
     )
 
 

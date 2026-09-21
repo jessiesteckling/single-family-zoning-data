@@ -67,26 +67,26 @@ def _legend(categories: list[str]) -> str:
 
 
 def format_ward_report(
-    shares: pd.DataFrame,
-    citywide: pd.Series,
+    ward_pct: pd.DataFrame,
+    citywide_pct: pd.Series,
     categories: list[str] = CATEGORY_ORDER,
     title: str | None = None,
     notes: list[str] | None = None,
 ) -> str:
-    pivot = shares.pivot(index="ward", columns="category", values="pct")
-    pivot = pivot.sort_index()[categories]
-    pivot.columns = [_COLUMN_LABELS[c] for c in categories]
+    pct_table = ward_pct.pivot(index="ward", columns="category", values="pct")
+    pct_table = pct_table.sort_index()[categories]
+    pct_table.columns = [_COLUMN_LABELS[c] for c in categories]
 
-    header = "| Ward | " + " | ".join(pivot.columns) + " |"
-    separator = "|---" * (len(pivot.columns) + 1) + "|"
+    header = "| Ward | " + " | ".join(pct_table.columns) + " |"
+    separator = "|---" * (len(pct_table.columns) + 1) + "|"
     citywide_row = (
         "| **All Chicago** | "
-        + " | ".join(f"**{v:.1f}%**" for v in citywide[categories])
+        + " | ".join(f"**{v:.1f}%**" for v in citywide_pct[categories])
         + " |"
     )
     ward_rows = [
         "| " + str(ward) + " | " + " | ".join(f"{v:.1f}%" for v in row) + " |"
-        for ward, row in pivot.iterrows()
+        for ward, row in pct_table.iterrows()
     ]
 
     table = "\n".join([header, separator, citywide_row, *ward_rows])

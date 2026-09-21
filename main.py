@@ -29,29 +29,29 @@ def main() -> None:
     zoning = fetch_geojson(ZONING_DATASET_ID)
     wards = fetch_geojson(WARDS_DATASET_ID)
 
-    shares = compute_ward_category_shares(zoning, wards)
-    citywide = compute_citywide_category_shares(zoning)
+    ward_pct = compute_ward_category_shares(zoning, wards)
+    citywide_pct = compute_citywide_category_shares(zoning)
 
     notes = [ohare_note(compute_ohare_context(zoning, wards))]
 
     # The residential report is the same table rescaled, not a second analysis:
     # drop the "Other" column and renormalise the remaining three to 100.
-    residential_shares = rescale_ward_shares_to(shares, RESIDENTIAL_CATEGORY_ORDER)
-    residential_citywide = rescale_category_shares_to(
-        citywide, RESIDENTIAL_CATEGORY_ORDER
+    residential_ward_pct = rescale_ward_shares_to(ward_pct, RESIDENTIAL_CATEGORY_ORDER)
+    residential_citywide_pct = rescale_category_shares_to(
+        citywide_pct, RESIDENTIAL_CATEGORY_ORDER
     )
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    shares.to_csv(PROCESSED_DIR / "ward_zoning_shares.csv", index=False)
+    ward_pct.to_csv(PROCESSED_DIR / "ward_zoning_shares.csv", index=False)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     reports = {
         OUTPUT_DIR
-        / "ward_zoning_report.md": format_ward_report(shares, citywide, notes=notes),
+        / "ward_zoning_report.md": format_ward_report(ward_pct, citywide_pct, notes=notes),
         OUTPUT_DIR
         / "ward_zoning_report_residential.md": format_ward_report(
-            residential_shares,
-            residential_citywide,
+            residential_ward_pct,
+            residential_citywide_pct,
             categories=RESIDENTIAL_CATEGORY_ORDER,
             title="Share of residentially zoned land, by ward",
             notes=notes,

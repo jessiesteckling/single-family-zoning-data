@@ -1,17 +1,17 @@
 | Ward | Single-Family Only | Apartments Allowed | Planned Development | Other |
 |---|---|---|---|---|
-| **All Chicago** | **40.3%** | **21.3%** | **14.1%** | **24.3%** |
+| **All Chicago** | **40.3%** | **21.5%** | **14.1%** | **24.1%** |
 | 1 | 32.3% | 59.5% | 6.0% | 2.2% |
 | 2 | 2.3% | 53.4% | 36.2% | 8.2% |
-| 3 | 2.9% | 54.5% | 29.8% | 12.9% |
-| 4 | 5.6% | 36.2% | 36.2% | 22.0% |
+| 3 | 2.9% | 56.9% | 29.8% | 10.5% |
+| 4 | 5.6% | 36.3% | 36.2% | 21.9% |
 | 5 | 11.4% | 39.2% | 19.1% | 30.3% |
 | 6 | 54.8% | 30.8% | 4.5% | 10.0% |
 | 7 | 42.1% | 27.9% | 7.3% | 22.7% |
 | 8 | 51.0% | 20.1% | 3.5% | 25.4% |
 | 9 | 51.3% | 10.7% | 7.2% | 30.8% |
 | 10 | 21.4% | 3.9% | 9.8% | 65.0% |
-| 11 | 27.0% | 17.7% | 8.8% | 46.5% |
+| 11 | 27.0% | 18.0% | 8.8% | 46.1% |
 | 12 | 31.4% | 10.7% | 8.5% | 49.4% |
 | 13 | 59.7% | 8.0% | 23.9% | 8.4% |
 | 14 | 44.3% | 8.9% | 7.8% | 39.1% |
@@ -25,16 +25,16 @@
 | 22 | 33.0% | 19.5% | 14.9% | 32.6% |
 | 23 | 67.8% | 11.0% | 5.0% | 16.2% |
 | 24 | 7.5% | 53.6% | 11.0% | 27.9% |
-| 25 | 4.9% | 42.5% | 14.0% | 38.6% |
+| 25 | 4.9% | 42.9% | 14.0% | 38.2% |
 | 26 | 56.0% | 18.8% | 4.5% | 20.7% |
-| 27 | 6.6% | 33.1% | 27.6% | 32.7% |
-| 28 | 4.6% | 39.2% | 22.5% | 33.7% |
+| 27 | 6.6% | 34.1% | 27.6% | 31.7% |
+| 28 | 4.6% | 44.7% | 22.5% | 28.1% |
 | 29 | 52.7% | 20.2% | 4.2% | 22.8% |
 | 30 | 77.5% | 13.4% | 1.9% | 7.2% |
 | 31 | 68.8% | 17.5% | 2.7% | 11.1% |
 | 32 | 28.2% | 36.0% | 18.8% | 17.0% |
 | 33 | 59.0% | 29.5% | 4.9% | 6.7% |
-| 34 | 0.0% | 58.2% | 30.2% | 11.6% |
+| 34 | 0.0% | 64.3% | 30.2% | 5.5% |
 | 35 | 60.1% | 20.4% | 5.0% | 14.5% |
 | 36 | 57.0% | 28.2% | 6.3% | 8.5% |
 | 37 | 56.5% | 15.0% | 7.4% | 21.2% |
@@ -42,7 +42,7 @@
 | 39 | 57.9% | 11.1% | 7.8% | 23.2% |
 | 40 | 60.6% | 21.0% | 5.6% | 12.8% |
 | 41 | 26.0% | 4.0% | 63.8% | 6.2% |
-| 42 | 0.0% | 33.0% | 46.7% | 20.3% |
+| 42 | 0.0% | 33.6% | 46.7% | 19.7% |
 | 43 | 0.3% | 57.0% | 11.2% | 31.5% |
 | 44 | 6.6% | 73.1% | 7.8% | 12.5% |
 | 45 | 70.2% | 13.8% | 2.8% | 13.1% |
@@ -54,9 +54,11 @@
 
 **Zoning codes by column:**
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
-- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Apartments Allowed: B, C, DC, DR, DS, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
 
-**Ward 41 and O'Hare.** One polygon, zone_class `PD 0`, covers the airport: 10.3 sq mi, 32% of all Planned Development land in the city and 60% of Ward 41 by area. It is classified correctly -- the zoning ordinance designates land within the Airport Layout Plan the Airport Planned Development -- but it dominates Ward 41's denominator and deflates every other figure in that row, so that ward is not comparable to the rest on this table. O'Hare falls entirely within Ward 41; no other ward is affected.
+Water inside a zoning district counts toward its area, since districts are drawn across waterways rather than around them. The Chicago River at Wolf Point falls inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside an `RS-3` polygon, where open water is counted as single-family land. Lake Michigan is not zoned and is excluded.
+
+**Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, which is zoned as a planned development. That pushes the ward's Planned Development figure up and its other figures down, so Ward 41 is not really comparable to the other wards in this table.
 

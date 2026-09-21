@@ -1,13 +1,11 @@
 """How two sets of polygons become a percentage per ward."""
 
-import copy
 import unittest
 
 import geopandas as gpd
 
 from src.analyze import (
     compute_citywide_category_shares,
-    compute_ohare_context,
     compute_ward_category_shares,
     rescale_category_shares_to,
     rescale_ward_shares_to,
@@ -122,20 +120,6 @@ class RestrictedShareTests(unittest.TestCase):
                 (PLANNED_DEV, 0.0),
             ],
         )
-
-
-class OhareContextTests(unittest.TestCase):
-    def test_it_finds_the_ward_holding_the_airport_polygon(self):
-        zoning = copy.deepcopy(fixtures.ZONING_RESPONSE)
-        zoning["features"][2]["properties"]["zone_class"] = "PD 0"  # the M1-1 block
-
-        context = compute_ohare_context(
-            _frame(zoning), _frame(fixtures.WARDS_RESPONSE)
-        )
-
-        self.assertEqual(context.ward, 2)
-        self.assertEqual(round(context.pct_of_planned_dev, 2), 100.0)
-        self.assertEqual(round(context.pct_of_ward, 2), 50.0)
 
 
 if __name__ == "__main__":

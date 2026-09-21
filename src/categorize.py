@@ -6,8 +6,14 @@ district's base zoning.
 Source: https://blog.chicagocityscape.com/how-much-of-chicago-bans-apartments-b6c5b68db2fb
 
 ALLOWED_PREFIXES is that map's own list, per its footnote: "Apartments & condos
-are allowed in RT, RM, B, C, DR, DC, and DX zoning districts." Taking C whole
-includes C3, which permits no housing -- kept for fidelity to the source.
+are allowed in RT, RM, B, C, DR, DC, and DX zoning districts."
+
+Two deliberate departures from it, both tiny and both following the zoning
+ordinance rather than the map:
+
+- DS is added. The map leaves it out, but Downtown Service districts carry a
+  residential density standard, so housing is permitted there.
+- C is still taken whole, which sweeps in C3, where no housing is allowed.
 """
 
 import re
@@ -20,7 +26,7 @@ OTHER = "All other zones (no residential allowed)"
 NOT_ALLOWED_PREFIXES = {"RS"}
 PLANNED_DEV_PREFIXES = {"PD"}
 # Base zoning prefixes where new multi-unit apartments/condos are permitted.
-ALLOWED_PREFIXES = {"RT", "RM", "B", "C", "DR", "DC", "DX"}
+ALLOWED_PREFIXES = {"RT", "RM", "B", "C", "DR", "DC", "DS", "DX"}
 
 CATEGORY_ORDER = [NOT_ALLOWED, ALLOWED, PLANNED_DEV, OTHER]
 

@@ -24,7 +24,7 @@ class CategorizeTests(unittest.TestCase):
             "POS-2": OTHER,
             "PMD 11": OTHER,
             "T": OTHER,
-            "DS-3": OTHER,
+            "DS-3": ALLOWED,
         }
         for code, expected in cases.items():
             with self.subTest(code=code):

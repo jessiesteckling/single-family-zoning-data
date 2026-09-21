@@ -22,11 +22,25 @@ class FakeResponse:
         return self._payload
 
 
-def _patch_get(payloads):
-    """Answer successive requests with successive payloads."""
-    return patch.object(
-        fetch_data.requests, "get", side_effect=[FakeResponse(p) for p in payloads]
-    )
+COUNT_URL = "https://data.cityofchicago.org/resource/{}.json?$select=count(*)"
+PAGE_URL = (
+    "https://data.cityofchicago.org/resource/{}.geojson"
+    "?$order=:id&$limit={}&$offset={}"
+)
+
+
+def _patch_get(payloads, reported_rows=None):
+    """Answer the row-count request, then each page in turn.
+
+    fetch_geojson asks the portal how many rows it should expect before paging,
+    so every call sequence starts with that. `reported_rows` overrides the count
+    to simulate a download that does not add up.
+    """
+    if reported_rows is None:
+        reported_rows = sum(len(p["features"]) for p in payloads)
+    responses = [FakeResponse([{"count": str(reported_rows)}])]
+    responses += [FakeResponse(p) for p in payloads]
+    return patch.object(fetch_data.requests, "get", side_effect=responses)
 
 
 class FetchGeojsonTests(unittest.TestCase):
@@ -98,10 +112,9 @@ class FetchGeojsonTests(unittest.TestCase):
         self.assertEqual(
             [call.args[0] for call in get.call_args_list],
             [
-                "https://data.cityofchicago.org/resource/dj47-wfun.geojson"
-                "?$limit=2&$offset=0",
-                "https://data.cityofchicago.org/resource/dj47-wfun.geojson"
-                "?$limit=2&$offset=2",
+                COUNT_URL.format("dj47-wfun"),
+                PAGE_URL.format("dj47-wfun", 2, 0),
+                PAGE_URL.format("dj47-wfun", 2, 2),
             ],
         )
 
@@ -122,11 +135,36 @@ class FetchGeojsonTests(unittest.TestCase):
 
         self.assertEqual(
             [call.args[0] for call in get.call_args_list],
-            [
-                "https://data.cityofchicago.org/resource/p293-wvbd.geojson"
-                "?$limit=5000&$offset=0"
-            ],
+            [COUNT_URL.format("p293-wvbd"), PAGE_URL.format("p293-wvbd", 5000, 0)],
         )
+
+
+class RowCountCheckTests(unittest.TestCase):
+    def test_a_short_download_raises_rather_than_returning_partial_data(self):
+        # The portal says four rows; only the three-feature page arrives.
+        with _patch_get([fixtures.ZONING_RESPONSE], reported_rows=4):
+            with self.assertRaises(RuntimeError) as caught:
+                fetch_data.fetch_geojson("dj47-wfun")
+
+        self.assertIn("downloaded 3 features", str(caught.exception))
+        self.assertIn("reports 4 rows", str(caught.exception))
+
+    def test_a_matching_count_passes_quietly(self):
+        with _patch_get([fixtures.ZONING_RESPONSE], reported_rows=3):
+            gdf = fetch_data.fetch_geojson("dj47-wfun")
+
+        self.assertEqual(len(gdf), 3)
+
+    def test_the_count_is_read_positionally_not_by_column_name(self):
+        with patch.object(
+            fetch_data.requests,
+            "get",
+            side_effect=[
+                FakeResponse([{"count_renamed_by_the_portal": "3"}]),
+                FakeResponse(fixtures.ZONING_RESPONSE),
+            ],
+        ):
+            self.assertEqual(len(fetch_data.fetch_geojson("dj47-wfun")), 3)
 
 
 if __name__ == "__main__":

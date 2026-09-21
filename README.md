@@ -26,8 +26,7 @@ always reflects the portal's current state. It needs network access.
 targets. Each runs through pipenv; pass `PYTHON=python3` to use an interpreter you have
 already set up.
 
-Tests: `make test` — 26 unit tests over literal mock portal responses, no network
-required.
+Tests: `make test` — unit tests over literal mock portal responses, no network needed.
 
 New to this data? Run `python3 local_scripts/explore_api.py` first — it prints example requests/responses from the Chicago Data Portal API so you can see the raw data shape before it's processed.
 
@@ -45,13 +44,15 @@ Chicago Cityscape blog post [Apartments & condos are banned in most of Chicago](
 data as of March 2022; groupings and calculations done in PostGIS).
 
 - Apartments & condos not allowed (RS)
-- Apartments & condos allowed (RT, RM, B, C*, DR, DX)
+- Apartments & condos allowed (RT, RM, B, C*, DC, DR, DS***, DX)
 - Planned Developments (PD**)
 - All other zones, no residential allowed
 
 \* Technically, C3 (a subset of C) doesn't allow residential, but that's an extremely small total land area
 
 \** O'Hare is a Planned Development which significantly impacts the ward 41 numbers
+
+\*** DS is included though the source map leaves it out — the zoning ordinance allows housing there
 
 
 ## Methods

@@ -5,7 +5,6 @@ import unittest
 import geopandas as gpd
 
 from src.analyze import (
-    OhareContext,
     compute_citywide_category_shares,
     compute_ward_category_shares,
     rescale_category_shares_to,
@@ -13,7 +12,7 @@ from src.analyze import (
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import SOURCE_CRS
-from src.report import format_ward_report, ohare_note
+from src.report import OHARE_NOTE, format_ward_report
 from tests.unit import fixtures
 
 EXPECTED_ALL_LAND_REPORT = """\
@@ -25,9 +24,11 @@ EXPECTED_ALL_LAND_REPORT = """\
 
 **Zoning codes by column:**
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
-- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Apartments Allowed: B, C, DC, DR, DS, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
+
+Water inside a zoning district counts toward its area, since districts are drawn across waterways rather than around them. The Chicago River at Wolf Point falls inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside an `RS-3` polygon, where open water is counted as single-family land. Lake Michigan is not zoned and is excluded.
 """
 
 EXPECTED_RESIDENTIAL_REPORT = """\
@@ -39,23 +40,21 @@ EXPECTED_RESIDENTIAL_REPORT = """\
 
 **Zoning codes by column:**
 - Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
-- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Apartments Allowed: B, C, DC, DR, DS, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
 
 Percentages are shares of land where residential is permitted or negotiable. \
 Zones allowing no housing (M, POS, PMD, T) are excluded from the denominator, \
 so a ward's figures here are higher than in the all-land table.
+
+Water inside a zoning district counts toward its area, since districts are drawn across waterways rather than around them. The Chicago River at Wolf Point falls inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside an `RS-3` polygon, where open water is counted as single-family land. Lake Michigan is not zoned and is excluded.
 """
 
 EXPECTED_OHARE_NOTE = (
-    "**Ward 7 and O'Hare.** One polygon, zone_class `PD 0`, covers the airport: "
-    "10.3 sq mi, 32% of all Planned Development land in the city and 60% of "
-    "Ward 7 by area. It is classified correctly -- the zoning ordinance "
-    "designates land within the Airport Layout Plan the Airport Planned "
-    "Development -- but it dominates Ward 7's denominator and deflates every "
-    "other figure in that row, so that ward is not comparable to the rest on "
-    "this table. O'Hare falls entirely within Ward 7; no other ward is "
-    "affected.\n"
+    "**Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, "
+    "which is zoned as a planned development. That pushes the ward's Planned "
+    "Development figure up and its other figures down, so Ward 41 is not "
+    "really comparable to the other wards in this table.\n"
 )
 
 
@@ -95,13 +94,8 @@ class ReportTests(unittest.TestCase):
 
 
 class FootnoteTests(unittest.TestCase):
-    def test_every_figure_in_the_note_comes_from_the_context(self):
-        note = ohare_note(
-            OhareContext(
-                ward=7, area_sq_mi=10.32, pct_of_planned_dev=32.0, pct_of_ward=60.0
-            )
-        )
-        self.assertEqual(note, EXPECTED_OHARE_NOTE)
+    def test_the_note_reads_as_expected(self):
+        self.assertEqual(OHARE_NOTE, EXPECTED_OHARE_NOTE)
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@ def main() -> None:
     notes = [ohare_note(compute_ohare_context(zoning, wards))]
 
     # The residential report is the same table rescaled, not a second analysis:
-    # drop the categories that allow no housing, then renormalise to 100.
+    # drop the "Other" column and renormalise the remaining three to 100.
     residential_shares = rescale_ward_shares_to(shares, RESIDENTIAL_CATEGORY_ORDER)
     residential_citywide = rescale_category_shares_to(
         citywide, RESIDENTIAL_CATEGORY_ORDER

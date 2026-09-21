@@ -76,15 +76,9 @@ def rescale_ward_shares_to(
 ) -> pd.DataFrame:
     """Rewrite each ward's percentages as shares of `categories` alone.
 
-    Drops the rows for every other category, then scales what is left so it adds
-    back up to 100. This is what turns the all-land report into the residential
-    one. Ward 10, for instance, is 65% industrial land and parkland; dropping
-    that leaves its three residential categories summing to 35, and rescaling
-    turns its 21.4% single-family into 61.0% -- a share of the land where
-    housing is allowed at all, rather than of every acre in the ward.
-
-    Within one ward a percentage is proportional to an area, so rescaling them
-    is exact and no second overlay is needed.
+    Drops the categories left out -- in practice "All other zones", the fourth
+    column of the all-land report -- then scales what remains back up to 100,
+    which is what turns that report into the residential one.
     """
     kept = shares[shares["category"].isin(categories)].copy()
 
@@ -92,8 +86,9 @@ def rescale_ward_shares_to(
     # so every row can divide by the total for the ward it belongs to.
     subtotal = kept.groupby("ward")["pct"].transform("sum")
 
-    # A ward with nothing in any kept category would divide by zero; .where
-    # makes that NaN, which shows up as missing rather than as inf.
+    # Percentages within a ward are proportional to area, so rescaling them is
+    # exact. A ward with nothing left would divide by zero; .where makes that
+    # NaN, which shows as missing rather than inf.
     kept["pct"] = kept["pct"].div(subtotal.where(subtotal > 0)).mul(100)
     return kept
 

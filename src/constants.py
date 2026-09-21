@@ -1,31 +1,16 @@
-"""Shared configuration: dataset identifiers, API settings, coordinate systems
-and unit conversions.
-
-What belongs here is cross-cutting -- used by more than one module, or a value
-worth stating once so a change lands everywhere. Domain definitions stay in the
-module they define: the zoning taxonomy is in `categorize.py`, the report's
-column labels are in `report.py`, and the output paths are in `main.py`, because
-those are what those modules are for.
-"""
-
 # --- Chicago Data Portal -----------------------------------------------------
 
 DATA_PORTAL_BASE_URL = "https://data.cityofchicago.org/resource"
 
-# Boundaries - Zoning Districts (current). One polygon per zoning district,
-# carrying a `zone_class` code such as "RS-1". Roughly 15,000 rows, and no ward
-# information -- which is why the two datasets have to be overlaid.
+# Boundaries - Zoning Districts (current).
 # https://data.cityofchicago.org/Community-Economic-Development/Boundaries-Zoning-Districts-current-/dj47-wfun
 ZONING_DATASET_ID = "dj47-wfun"
 
-# Boundaries - Wards (2023-). One polygon per ward, 50 rows, no zoning
-# information.
+# Boundaries - Wards (2023-).
 # https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Wards-2023-/p293-wvbd
 WARDS_DATASET_ID = "p293-wvbd"
 
-# Rows per paginated request. A choice, not a limit: the portal's $limit
-# defaults to 1,000 and accepts up to 50,000. 5,000 keeps the zoning dataset to
-# three requests.
+# Rows per paginated request.
 PAGE_SIZE = 5000
 
 # --- Coordinate reference systems --------------------------------------------
@@ -40,9 +25,11 @@ PAGE_SIZE = 5000
 # Chicago, against about 69 miles for a degree of latitude.
 #
 # We state it here rather than reading it off the response. The portal does
-# label its data correctly, but that label sits on a wrapper around the list of
-# shapes, and `fetch_geojson` hands geopandas only the shapes themselves, so the
-# label never reaches it. (WGS84 longitude/latitude.)
+# label its data, but the label is a `crs` key at the top level of the response,
+# sitting alongside the `features` list rather than inside it. `fetch_geojson`
+# keeps only that list, because it has to join the features from several pages
+# into one, so the label is gone before geopandas ever sees the shapes.
+# (WGS84 longitude/latitude.)
 SOURCE_CRS = "EPSG:4326"
 
 # What everything is converted to before any area is measured: a flat grid laid

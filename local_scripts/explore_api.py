@@ -2,7 +2,7 @@
 of the main pipeline -- run it to see what a request looks like and what comes
 back, before it gets turned into GeoDataFrames.
 
-One API (Socrata/SODA), two datasets: zoning districts and ward boundaries.
+One API, two datasets: zoning districts and ward boundaries.
 Both accept the same query syntax, so `tour` runs the same requests against
 either one.
 
@@ -10,9 +10,9 @@ Run: python3 local_scripts/explore_api.py
 
 Docs
 ----
-SoQL query reference, for the $ params used below:
+Query reference, for the $ params used below:
     https://dev.socrata.com/docs/queries/
-The $order page is where Socrata states that paging without it gives no stable
+The $order page is where the portal states that paging without it gives no stable
 row order, which is why the pagination pattern at the bottom passes $order=:id.
 Response formats, .json against .geojson:
     https://dev.socrata.com/docs/endpoints.html
@@ -38,11 +38,11 @@ import requests
 BASE_URL = "https://data.cityofchicago.org/resource"
 
 # Boundaries - Zoning Districts (current)
-# https://dev.socrata.com/foundry/data.cityofchicago.org/dj47-wfun
+# https://data.cityofchicago.org/Community-Economic-Development/Boundaries-Zoning-Districts-current-/dj47-wfun
 ZONING_DATASET_ID = "dj47-wfun"
 
 # Boundaries - Wards (2023-)
-# https://dev.socrata.com/foundry/data.cityofchicago.org/p293-wvbd
+# https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Wards-2023-/p293-wvbd
 WARDS_DATASET_ID = "p293-wvbd"
 
 # Responses are printed for reading, not parsing. Both endpoints return geometry,
@@ -88,7 +88,7 @@ def show_fields(dataset_id: str, label: str) -> None:
 
 
 def tour(dataset_id: str, label: str, group_column: str) -> None:
-    """Run the same four requests against any Socrata dataset."""
+    """Run the same four requests against any dataset on the portal."""
     # Aggregation, like SQL "SELECT COUNT(*)". Cheap way to size a dataset
     # before downloading it, and the check that a paginated download got
     # everything.
@@ -127,9 +127,9 @@ def main() -> None:
     )
 
     # Pagination: src/fetch_data.py pages with $limit/$offset because $limit
-    # defaults to 1,000 (SODA 2.0 allows up to 50,000) and the zoning dataset
+    # defaults to 1,000 (the portal allows up to 50,000) and the zoning dataset
     # has ~15,000 rows. $order=:id keeps the order stable across pages, which
-    # Socrata requires -- without it rows can repeat or go missing.
+    # the portal requires -- without it rows can repeat or go missing.
     print("\n=== Pagination pattern used for full downloads ===")
     for offset in (0, 5000, 10000):
         print(

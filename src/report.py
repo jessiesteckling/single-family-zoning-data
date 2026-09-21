@@ -11,7 +11,6 @@ import pandas as pd
 
 from .analyze import OhareContext
 from .categorize import (
-    OHARE_ZONE_CLASS,
     ALLOWED,
     ALLOWED_PREFIXES,
     CATEGORY_ORDER,
@@ -21,6 +20,7 @@ from .categorize import (
     PLANNED_DEV,
     PLANNED_DEV_PREFIXES,
 )
+from .constants import OHARE_ZONE_CLASS
 
 _COLUMN_LABELS = {
     NOT_ALLOWED: "Single-Family Only",

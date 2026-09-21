@@ -8,12 +8,7 @@ snapshot happened to be sitting in the working tree.
 import geopandas as gpd
 import requests
 
-SOCRATA_BASE_URL = "https://data.cityofchicago.org/resource"
-PAGE_SIZE = 5000
-
-# GeoJSON is WGS84 by definition (RFC 7946) and Socrata sends no crs member, so
-# the CRS has to be supplied here rather than inferred.
-WGS84 = "EPSG:4326"
+from .constants import PAGE_SIZE, SOCRATA_BASE_URL, WGS84
 
 
 def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:

@@ -7,13 +7,8 @@ from typing import NamedTuple
 import geopandas as gpd
 import pandas as pd
 
-from .categorize import CATEGORY_ORDER, OHARE_ZONE_CLASS, PLANNED_DEV, categorize
-
-# Illinois State Plane East (NAD83, US feet) -- a projected CRS appropriate
-# for accurate area measurement within Chicago.
-PROJECTED_CRS = "EPSG:3435"
-
-SQ_FEET_PER_SQ_MILE = 27_878_400
+from .categorize import CATEGORY_ORDER, PLANNED_DEV, categorize
+from .constants import OHARE_ZONE_CLASS, PROJECTED_CRS, SQ_FEET_PER_SQ_MILE
 
 
 def compute_ward_category_shares(

@@ -319,7 +319,7 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 | L5 | `src/report.py:42` | `pivot.round(1)` is dead; every value is re-formatted by `f"{v:.1f}%"`. |
 | L6 | `src/analyze.py:68-70` | `groupby("category").geometry.apply(lambda geoms: geoms.area.sum())` is roundabout and leaves `Name: geometry` on the result. Summing an `area` column is clearer. |
 | L7 | `src/analyze.py:21,27,64,66` | The `zoning` and `wards` parameters are rebound to reprojected copies. Harmless, since `.copy()` is called, but it obscures that the inputs are untouched. |
-| L8 | `src/analyze.py:12` | `PROJECTED_CRS` is hardcoded in the analysis module while all other configuration lives in `main.py`. |
+| L8 | `src/constants.py` | Resolved. `PROJECTED_CRS` sat in the analysis module while other configuration sat in `main.py`; dataset ids, API settings, both CRSs, the unit conversion, the O'Hare zone class and the output paths now share one annotated module. The zoning taxonomy stays in `categorize.py` and the column labels in `report.py`, since those are what those modules define. |
 | L9 | `src/__pycache__/` | Stale `.pyc` files including `chart.cpython-311.pyc` for a module that does not exist. Untracked; cruft only. |
 | L10 | `src/fetch_data.py` | Resolved with H6. `fetch_geojson` conflated HTTP paging, cache management and parsing; caching is gone, so it now only pages and parses. |
 | L11 | `src/analyze.py:46-55` | `reindex(fill_value=0)` makes "0% of this category" and "no data for this ward" indistinguishable. Harmless now, since all 50 wards have data. |

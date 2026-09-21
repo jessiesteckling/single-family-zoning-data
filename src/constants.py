@@ -45,7 +45,3 @@ SOURCE_CRS = "EPSG:4326"
 # ships alongside its own data to six decimal places.
 # (NAD83 / Illinois State Plane East, US survey feet.)
 PROJECTED_CRS = "EPSG:3435"
-
-# 5,280 feet to a mile, squared -> 27,878,400. PROJECTED_CRS is in feet, so
-# every area arrives in square feet and divides by this to be readable.
-SQ_FEET_PER_SQ_MILE = 5280**2

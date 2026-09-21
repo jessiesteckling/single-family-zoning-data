@@ -128,15 +128,15 @@ def main() -> None:
 
     # Pagination: src/fetch_data.py pages with $limit/$offset because $limit
     # defaults to 1,000 (the portal allows up to 50,000) and the zoning dataset
-    # has ~15,000 rows. $order=:id keeps the order stable across pages, which
-    # the portal requires -- without it rows can repeat or go missing.
+    # has ~15,000 rows. These are the requests it actually makes.
     print("\n=== Pagination pattern used for full downloads ===")
     for offset in (0, 5000, 10000):
-        print(
-            f"{BASE_URL}/{ZONING_DATASET_ID}.geojson"
-            f"?$order=:id&$limit=5000&$offset={offset}"
-        )
+        print(f"{BASE_URL}/{ZONING_DATASET_ID}.geojson?$limit=5000&$offset={offset}")
     print("...until a page comes back with fewer than 5000 features.")
+
+    # The portal documents that paging without $order gives no stable row
+    # ordering, so the pipeline should be adding &$order=:id and does not yet.
+    # Tracked as H4 in docs/review-findings.md.
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ always reflects the portal's current state. It needs network access.
 targets. Each runs through pipenv; pass `PYTHON=python3` to use an interpreter you have
 already set up.
 
-Tests: `make test` — 26 unit tests over literal mock portal responses, no network
+Tests: `make test` — 25 unit tests over literal mock portal responses, no network
 required.
 
 New to this data? Run `python3 local_scripts/explore_api.py` first — it prints example requests/responses from the Chicago Data Portal API so you can see the raw data shape before it's processed.

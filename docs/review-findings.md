@@ -1,16 +1,20 @@
 # Code review findings
 
-Review date: 2026-09-19. Reviewed commit: `9ebeec8`.
+Review date: 2026-09-19, against commit `9ebeec8`. Kept current since: findings are marked
+resolved as they are fixed, and the measurements are re-checked when the code they describe
+changes. Code references name files only, not line numbers, which drifted through several
+refactors.
 
-Method: the pipeline was re-run from the cached raw data and reproduced
+Method: the pipeline was re-run and reproduced
 `data/processed/ward_zoning_shares.csv` to within 7e-15. Geometry and area math were
 validated against the zoning dataset's own `shape_area` attribute. Zoning-code
 classifications were checked against the Chicago Zoning Ordinance and secondary
 references. Dataset identities were confirmed against the Chicago Data Portal.
 
-Limitation: the Data Portal returned HTTP 503 for the entire domain during this review,
-so live API calls were not exercised. API behavior was verified from Socrata's
-documentation and from the cached 14,986-feature response.
+Limitation, since lifted: the Data Portal returned HTTP 503 for its entire domain during
+the first pass, so API behaviour was taken from the vendor documentation and a cached
+14,986-feature response. It was re-checked against the live API on 2026-09-20, which
+downgraded H4 and H5 from high severity.
 
 ## Verified correct
 
@@ -41,7 +45,7 @@ These were tested and hold. Listed so they are not re-litigated.
 
 ### H1. O'Hare puts Ward 41 in the wrong half of the chart
 
-`src/categorize.py:14`, `src/report.py:22`
+`src/categorize.py`, `src/report.py`
 
 One polygon carries `zone_class = "PD 0"`, `pd_num = 0`, `case_numbe = 0`, covering
 10.32 sq mi (6,604 acres). It contains the FAA airport reference point, Terminal 2 and the
@@ -73,12 +77,21 @@ This is confined to one ward. `PD 0` is 61.7% of Ward 41; the next-largest singl
 concentration anywhere is `PD 610` at 23.0% of Ward 13, then `PD 43` at 12.0% of Ward 5.
 Nothing else distorts a row.
 
-Fix: footnote Ward 41, or report it both ways. Do not move `PD 0` to `OTHER` — that would
-be less accurate than current behavior. The citywide row is a weaker case: 32% of that
-column being one airport is worth a note, but it misranks nothing.
+Addressed by footnote. Both reports now carry a plain-language note saying most of Ward 41
+is the airport and that the ward is not comparable to the others. It deliberately quotes no
+figures — the measurements above stay here rather than in the output. `PD 0` was not moved
+to `OTHER`, which would be less accurate than current behaviour.
+
+Because the note quotes no figures, nothing computes them: the area and share arithmetic
+behind it was deleted, along with `OHARE_ZONE_CLASS` and `SQ_FEET_PER_SQ_MILE`, whose only
+caller it was. The evidence for those numbers lives here instead.
+
+The ranking problem itself is unfixed and unfixable by a footnote: Ward 41 still sorts 34th
+on single-family share. The citywide row is a weaker case — 32% of that column being one
+airport is worth knowing, but it misranks nothing.
 ### H2. `C3` is classified as apartments-allowed; C3 permits no housing
 
-`src/categorize.py:16`
+`src/categorize.py`
 
 C3 is Commercial, Manufacturing and Employment, intended as a buffer against residential
 encroachment next to M and PMD districts. C1 and C2 permit dwelling units above the
@@ -94,7 +107,7 @@ silently. Noted as a caveat in the README in the meantime.
 
 ### H3. `DS` is reported as no-residential; DS permits dwelling units
 
-`src/report.py:33`
+`src/report.py`
 
 Downtown Service districts carry a residential density standard (400 sq ft per dwelling
 unit, 300 for efficiency, 200 for SRO) and a 30 ft setback for floors containing dwelling
@@ -109,7 +122,7 @@ falls through to `OTHER` — so this stays open.
 
 ### H4. Paginated fetch omits `$order` — latent, does not currently reproduce
 
-`src/fetch_data.py:25-28`
+`src/fetch_data.py`
 
 Downgraded to medium severity on 2026-09-20 after live verification. Originally filed as
 high on the strength of Socrata's documentation alone, because the portal was returning
@@ -138,7 +151,7 @@ nothing.
 
 ### H5. A short page is treated as end-of-data, so truncation is silent
 
-`src/fetch_data.py:34`
+`src/fetch_data.py`
 
 `if len(page_features) < PAGE_SIZE: break` assumes any short page is the last. A throttled
 response, a lowered export cap or a partial page ends the loop, and the pipeline then
@@ -152,7 +165,7 @@ Compare the assembled feature count against `$select=count(*)` before returning.
 
 ### H6. README claims the run fetches current data; it does not — resolved
 
-`README.md:6`, `src/fetch_data.py:19-20`
+`README.md`, `src/fetch_data.py`
 
 Originally: `fetch_geojson` returned the cache unconditionally when the file existed, with
 no TTL, no `--refresh` flag and no invalidation path, so a clone downloaded once and never
@@ -170,7 +183,7 @@ function now has one job.
 ### H7. The stated deliverable, a chart, does not exist
 
 CLAUDE.md opens with "producing a chart showing the percentage of land zoned for each use,
-broken down by ward"; `README.md:4` repeats it. The pipeline emits a markdown table.
+broken down by ward"; `README.md` repeats it. The pipeline emits a markdown table.
 
 A stale `src/__pycache__/chart.cpython-311.pyc` exists for a `chart.py` that was never
 committed, so the chart step appears lost rather than deliberately dropped. CLAUDE.md
@@ -180,7 +193,7 @@ directs chart work to the `dataviz` skill.
 
 ### M1. The "All Chicago" row is not the aggregate of the table it heads
 
-`src/analyze.py:59-72`
+`src/analyze.py`
 
 `compute_citywide_category_shares` sums unclipped zoning polygons; the ward rows sum
 ward-clipped pieces. RS reads 40.315% against 40.391% aggregated from the table; PD reads
@@ -231,7 +244,7 @@ is small, but "percentage of land" in CLAUDE.md and the README is imprecise.
 
 ### M5. The "Single-Family Only" column label overstates RS
 
-`src/report.py:20`
+`src/report.py`
 
 RS-3 permits two-flats, subject to 2,500 sq ft per unit — so a 5,000 sq ft lot, or 1,500
 sq ft per unit under the 17-2-0303-B block-context reduction. RS-2 and RS-3 have permitted
@@ -249,7 +262,7 @@ buildable density without changing `zone_class`. State this as a scope limit.
 
 ### M7. Unrecognized prefixes silently become "no residential allowed"
 
-`src/categorize.py:34`
+`src/categorize.py`
 
 The fallthrough branch is a guess presented as a fact; a new or renamed code is absorbed
 with no signal. The existing malformed values (`RM4.5`, `RM5.5`, `RM4-.5`, `PMD13`) happen
@@ -260,7 +273,7 @@ surface an explicit `Unclassified` bucket.
 
 ### M8. Invalid and empty geometries are neither repaired nor reported
 
-`src/analyze.py:30-34`
+`src/analyze.py`
 
 119 invalid and 4 empty geometries. Every run emits
 `UserWarning: keep_geom_type=True in overlay resulted in 9 dropped geometries`.
@@ -271,7 +284,7 @@ invalid input as the data changes, and an ignored warning will hide the next rea
 
 ### M9. The cited classification source cannot be verified
 
-`src/categorize.py:1-4`
+`src/categorize.py`
 
 Resolved 2026-09-20. The map itself was located and read. Its footnote states "Apartments
 & condos are allowed in RT, RM, B, C, DR, DC, and DX zoning districts", which is exactly
@@ -297,8 +310,8 @@ changes would predict.
 Originally: no test directory existed, though CLAUDE.md asks for "small, testable functions
 for data transformations ... so they can be verified independently of the chart output".
 
-Resolved: `tests/unit/` holds 29 tests over mock portal responses, run with
-`python3 -m unittest discover -s tests -t .` and verified to pass with sockets disabled.
+Resolved: `tests/unit/` holds 25 tests over literal mock portal responses, run with
+`make test` and verified to pass with sockets disabled.
 The fixtures are a two-ward toy city whose middle district straddles the ward line, so the
 overlay's defining behaviour — splitting a district between the wards it falls in rather
 than assigning it to one — is asserted directly.
@@ -319,15 +332,15 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 |---|---|---|
 | L1 | `local_scripts/explore_api.py` | Resolved. The comment claimed a request "caps out (5,000 rows/page here)"; Socrata's default `$limit` is 1,000, SODA 2.0's maximum is 50,000, and 2.1/3.0 have none. Two further claims in that file were also wrong about the API — that plain `.json` returns no geometry, and that one `.json` row shows the schema. All three corrected, and the response print cap is now the named `MAX_PRINT_CHARS` rather than a bare `[:1500]`. |
 | L2 | `main.py` | `PROCESSED_DIR` and `OUTPUT_DIR` are CWD-relative, so running from anywhere but the repo root writes the CSV and both reports into a new tree rather than updating the committed ones. Anchor to `Path(__file__).parent`. |
-| L3 | `src/fetch_data.py:32` | `page["features"]` raises a bare `KeyError` on an error payload. `raise_for_status()` does catch the 503 seen during review, but a 200 with an error body would not be. |
-| L4 | `src/report.py:19-24` | Category names differ between the CSV (`Apartments & condos not allowed (RS)`) and the report (`Single-Family Only`), so the two artifacts cannot be joined on category without a lookup. |
-| L5 | `src/report.py:42` | `pivot.round(1)` is dead; every value is re-formatted by `f"{v:.1f}%"`. |
-| L6 | `src/analyze.py:68-70` | `groupby("category").geometry.apply(lambda geoms: geoms.area.sum())` is roundabout and leaves `Name: geometry` on the result. Summing an `area` column is clearer. |
-| L7 | `src/analyze.py:21,27,64,66` | The `zoning` and `wards` parameters are rebound to reprojected copies. Harmless, since `.copy()` is called, but it obscures that the inputs are untouched. |
-| L8 | `src/constants.py` | Resolved. `PROJECTED_CRS` sat in the analysis module while other configuration sat in `main.py`; dataset ids, API settings, both CRSs, the unit conversion, the O'Hare zone class and the output paths now share one annotated module. The zoning taxonomy stays in `categorize.py` and the column labels in `report.py`, since those are what those modules define. |
+| L3 | `src/fetch_data.py` | `page["features"]` raises a bare `KeyError` on an error payload. `raise_for_status()` does catch the 503 seen during review, but a 200 with an error body would not be. |
+| L4 | `src/report.py` | Category names differ between the CSV (`Apartments & condos not allowed (RS)`) and the report (`Single-Family Only`), so the two artifacts cannot be joined on category without a lookup. |
+| L5 | `src/report.py` | Resolved. `pivot.round(1)` was dead, every value being re-formatted by `f"{v:.1f}%"`; it went when the formatter was parameterised for the second report. |
+| L6 | `src/analyze.py` | `groupby("category").geometry.apply(lambda geoms: geoms.area.sum())` is roundabout and leaves `Name: geometry` on the result. Summing an `area` column is clearer. |
+| L7 | `src/analyze.py` | The `zoning` and `wards` parameters are rebound to reprojected copies. Harmless, since `.copy()` is called, but it obscures that the inputs are untouched. |
+| L8 | `src/constants.py` | Resolved. `PROJECTED_CRS` sat in the analysis module while other configuration sat in `main.py`. Dataset ids, the portal base URL, the page size and both CRSs now share one annotated module. The zoning taxonomy stays in `categorize.py`, the column labels in `report.py` and the output paths in `main.py`, since those are what those modules define. |
 | L9 | `src/__pycache__/` | Stale `.pyc` files including `chart.cpython-311.pyc` for a module that does not exist. Untracked; cruft only. |
 | L10 | `src/fetch_data.py` | Resolved with H6. `fetch_geojson` conflated HTTP paging, cache management and parsing; caching is gone, so it now only pages and parses. |
-| L11 | `src/analyze.py:46-55` | `reindex(fill_value=0)` makes "0% of this category" and "no data for this ward" indistinguishable. Harmless now, since all 50 wards have data. |
+| L11 | `src/analyze.py` | `reindex(fill_value=0)` makes "0% of this category" and "no data for this ward" indistinguishable. Harmless now, since all 50 wards have data. |
 
 ## Suggested fix order
 

@@ -27,11 +27,15 @@ PAGE_SIZE = 5000
 
 # --- Coordinate reference systems --------------------------------------------
 
-# What the portal sends. GeoJSON is WGS84 by definition (RFC 7946) and Socrata
-# includes no `crs` member, so this has to be supplied rather than inferred:
-# `GeoDataFrame.from_features` infers nothing and `to_crs` raises without it.
-# Coordinates are degrees, so this CRS cannot be used to measure area.
-WGS84 = "EPSG:4326"
+# What the portal's GeoJSON arrives in. Socrata declares it in the response as
+# "urn:ogc:def:crs:OGC:1.3:CRS84" -- WGS84 longitude/latitude, which for our
+# purposes is EPSG:4326 -- and RFC 7946 requires WGS84 for GeoJSON anyway.
+#
+# It still has to be passed explicitly, because `fetch_geojson` hands
+# `GeoDataFrame.from_features` the bare feature list. The declaration lives on
+# the FeatureCollection wrapper, which `from_features` never sees, so without
+# this the frame comes back with `crs=None` and `to_crs` raises.
+SOURCE_CRS = "EPSG:4326"
 
 # NAD83 / Illinois East, US survey feet -- what areas are measured in.
 #
@@ -50,7 +54,7 @@ PROJECTED_CRS = "EPSG:3435"
 
 # 5,280 feet to a mile, squared -> 27,878,400. PROJECTED_CRS is in feet, so
 # every area arrives in square feet and divides by this to be readable.
-SQ_FEET_PER_SQ_MILE = 5_280**2
+SQ_FEET_PER_SQ_MILE = 5280**2
 
 # --- Data quirks -------------------------------------------------------------
 

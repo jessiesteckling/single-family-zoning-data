@@ -8,7 +8,7 @@ snapshot happened to be sitting in the working tree.
 import geopandas as gpd
 import requests
 
-from .constants import PAGE_SIZE, SOCRATA_BASE_URL, WGS84
+from .constants import PAGE_SIZE, SOCRATA_BASE_URL, SOURCE_CRS
 
 
 def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
@@ -28,4 +28,4 @@ def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
             break
         offset += PAGE_SIZE
 
-    return gpd.GeoDataFrame.from_features(features, crs=WGS84)
+    return gpd.GeoDataFrame.from_features(features, crs=SOURCE_CRS)

@@ -9,8 +9,8 @@ from src.analyze import (
     compute_citywide_category_shares,
     compute_ohare_context,
     compute_ward_category_shares,
-    restrict_category_shares,
-    restrict_ward_shares,
+    rescale_category_shares_to,
+    rescale_ward_shares_to,
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import SOURCE_CRS
@@ -96,7 +96,7 @@ class RestrictedShareTests(unittest.TestCase):
         shares = compute_ward_category_shares(
             _frame(fixtures.ZONING_RESPONSE), _frame(fixtures.WARDS_RESPONSE)
         )
-        restricted = restrict_ward_shares(shares, RESIDENTIAL_CATEGORY_ORDER)
+        restricted = rescale_ward_shares_to(shares, RESIDENTIAL_CATEGORY_ORDER)
 
         self.assertEqual(
             _rows(restricted),
@@ -112,7 +112,7 @@ class RestrictedShareTests(unittest.TestCase):
 
     def test_the_whole_restricted_citywide_series(self):
         citywide = compute_citywide_category_shares(_frame(fixtures.ZONING_RESPONSE))
-        restricted = restrict_category_shares(citywide, RESIDENTIAL_CATEGORY_ORDER)
+        restricted = rescale_category_shares_to(citywide, RESIDENTIAL_CATEGORY_ORDER)
 
         self.assertEqual(
             [(k, round(v, 2)) for k, v in restricted.items()],

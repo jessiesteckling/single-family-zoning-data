@@ -71,22 +71,39 @@ def compute_citywide_category_shares(zoning: gpd.GeoDataFrame) -> pd.Series:
     return pct.reindex(CATEGORY_ORDER, fill_value=0)
 
 
-def restrict_ward_shares(
+def rescale_ward_shares_to(
     shares: pd.DataFrame, categories: list[str]
 ) -> pd.DataFrame:
-    """Return `shares` limited to `categories`, with each ward's percentages
-    renormalized to sum to 100 across just those categories.
+    """Rewrite each ward's percentages as shares of `categories` alone.
+
+    Drops the rows for every other category, then scales what is left so it adds
+    back up to 100. This is what turns the all-land report into the residential
+    one. Ward 10, for instance, is 65% industrial land and parkland; dropping
+    that leaves its three residential categories summing to 35, and rescaling
+    turns its 21.4% single-family into 61.0% -- a share of the land where
+    housing is allowed at all, rather than of every acre in the ward.
+
+    Within one ward a percentage is proportional to an area, so rescaling them
+    is exact and no second overlay is needed.
     """
     kept = shares[shares["category"].isin(categories)].copy()
+
+    # transform("sum") broadcasts each ward's subtotal back onto its own rows,
+    # so every row can divide by the total for the ward it belongs to.
     subtotal = kept.groupby("ward")["pct"].transform("sum")
+
+    # A ward with nothing in any kept category would divide by zero; .where
+    # makes that NaN, which shows up as missing rather than as inf.
     kept["pct"] = kept["pct"].div(subtotal.where(subtotal > 0)).mul(100)
     return kept
 
 
-def restrict_category_shares(
+def rescale_category_shares_to(
     citywide: pd.Series, categories: list[str]
 ) -> pd.Series:
-    """Citywide equivalent of `restrict_ward_shares`."""
+    """Rescale the citywide percentages the same way, for the All Chicago row
+    of the residential report.
+    """
     kept = citywide.reindex(categories)
     return kept / kept.sum() * 100
 

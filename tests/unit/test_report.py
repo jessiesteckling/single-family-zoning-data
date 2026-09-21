@@ -8,8 +8,8 @@ from src.analyze import (
     OhareContext,
     compute_citywide_category_shares,
     compute_ward_category_shares,
-    restrict_category_shares,
-    restrict_ward_shares,
+    rescale_category_shares_to,
+    rescale_ward_shares_to,
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import SOURCE_CRS
@@ -77,8 +77,8 @@ class ReportTests(unittest.TestCase):
 
     def test_the_whole_residential_report(self):
         report = format_ward_report(
-            restrict_ward_shares(self.shares, RESIDENTIAL_CATEGORY_ORDER),
-            restrict_category_shares(self.citywide, RESIDENTIAL_CATEGORY_ORDER),
+            rescale_ward_shares_to(self.shares, RESIDENTIAL_CATEGORY_ORDER),
+            rescale_category_shares_to(self.citywide, RESIDENTIAL_CATEGORY_ORDER),
             categories=RESIDENTIAL_CATEGORY_ORDER,
         )
         self.assertEqual(report, EXPECTED_RESIDENTIAL_REPORT)

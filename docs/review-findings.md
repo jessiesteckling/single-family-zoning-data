@@ -116,9 +116,17 @@ legend names it explicitly as an example of zoning where no residential is allow
 
 39 polygons, 0.59 sq mi, 0.26% of land. Low materiality, but a printed false claim.
 
+Inherited, like H2, not a transcription slip. The source map's footnote lists the
+apartments-allowed districts as "RT, RM, B, C, DR, DC, and DX" — `DS` is absent, so the
+code reproduces the map faithfully. The map and the ordinance disagree here.
+
+Taken together with H2, the source diverges from the ordinance in both directions and by
+similar amounts: C3 counted as allowing apartments when it allows no housing (0.16% of
+land), and DS counted as allowing nothing when it permits dwelling units (0.26%). Fixing
+either means deliberately departing from the cited source.
+
 Partly addressed: `DS` has been dropped from the legend's list of no-residential examples,
-so the report no longer asserts it. The classification itself is unchanged — `DS` still
-falls through to `OTHER` — so this stays open.
+so the report no longer asserts it in print. The classification is unchanged.
 
 ### H4. Paginated fetch omits `$order` — latent, does not currently reproduce
 

@@ -61,7 +61,7 @@
 
 Percentages are shares of land where residential is permitted or negotiable. Zones allowing no housing (M, POS, PMD, T) are excluded from the denominator, so a ward's figures here are higher than in the all-land table.
 
-Water inside a zoning district counts toward its area. The Chicago River and its branches run through zoned land rather than being cut out of it, so a little of each riverside ward's figure is river. Lake Michigan is not zoned and is excluded.
+Water inside a zoning district counts toward its area, since districts are drawn across waterways rather than around them. The Chicago River at Wolf Point falls inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside an `RS-3` polygon, where open water is counted as single-family land. Lake Michigan is not zoned and is excluded.
 
 **Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, which is zoned as a planned development. That pushes the ward's Planned Development figure up and its other figures down, so Ward 41 is not really comparable to the other wards in this table.
 

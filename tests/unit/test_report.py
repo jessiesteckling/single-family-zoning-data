@@ -28,7 +28,7 @@ EXPECTED_ALL_LAND_REPORT = """\
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
 
-Water inside a zoning district counts toward its area. The Chicago River and its branches run through zoned land rather than being cut out of it, so a little of each riverside ward's figure is river. Lake Michigan is not zoned and is excluded.
+Water inside a zoning district counts toward its area, since districts are drawn across waterways rather than around them. The Chicago River at Wolf Point falls inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside an `RS-3` polygon, where open water is counted as single-family land. Lake Michigan is not zoned and is excluded.
 """
 
 EXPECTED_RESIDENTIAL_REPORT = """\
@@ -47,7 +47,7 @@ Percentages are shares of land where residential is permitted or negotiable. \
 Zones allowing no housing (M, POS, PMD, T) are excluded from the denominator, \
 so a ward's figures here are higher than in the all-land table.
 
-Water inside a zoning district counts toward its area. The Chicago River and its branches run through zoned land rather than being cut out of it, so a little of each riverside ward's figure is river. Lake Michigan is not zoned and is excluded.
+Water inside a zoning district counts toward its area, since districts are drawn across waterways rather than around them. The Chicago River at Wolf Point falls inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek inside an `RS-3` polygon, where open water is counted as single-family land. Lake Michigan is not zoned and is excluded.
 """
 
 EXPECTED_OHARE_NOTE = (

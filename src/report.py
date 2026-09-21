@@ -52,9 +52,11 @@ OHARE_NOTE = (
 
 
 _WATER_NOTE = (
-    "Water inside a zoning district counts toward its area. The Chicago River and its "
-    "branches run through zoned land rather than being cut out of it, so a little of "
-    "each riverside ward's figure is river. Lake Michigan is not zoned and is excluded."
+    "Water inside a zoning district counts toward its area, since districts are drawn "
+    "across waterways rather than around them. The Chicago River at Wolf Point falls "
+    "inside `PD 98`, Goose Island's east channel inside `PMD 3`, and Bubbly Creek "
+    "inside an `RS-3` polygon, where open water is counted as single-family land. "
+    "Lake Michigan is not zoned and is excluded."
 )
 
 

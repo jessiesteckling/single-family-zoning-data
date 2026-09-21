@@ -44,7 +44,7 @@ against the live API on 2026-09-20.
 |---|---|---|---|
 | C1 | `EPSG:3435` is correct for measuring area in Chicago | Holds, strongly | Computed areas match the dataset's own `shape_area` field at a ratio of 1.00000 at both the 5th and 95th percentile across all 14,982 non-null polygons |
 | C2 | Geometries are valid enough for `overlay` | Caveat | 119 invalid and 4 empty geometries. Measured impact is nil: `make_valid()` shifts total area by 0.00000 sq mi and the 9 geometries `overlay` drops are degenerate slivers. Unguarded, and the resulting warning is ignored on every run. M8 |
-| C3 | Planar polygon area measures **land** | **Broken** for water | River surface sits inside zoning polygons: Wolf Point river water in `PD 98`, Goose Island's east channel in `PMD 3`, Bubbly Creek inside an `RS-3` polygon, i.e. open water counted as single-family land. Lake Michigan is correctly excluded, being neither zoned nor in any ward. M4 |
+| C3 | Planar polygon area measures **land** | **Broken** for water; now disclosed | River surface sits inside zoning polygons: Wolf Point river water in `PD 98`, Goose Island's east channel in `PMD 3`, Bubbly Creek inside an `RS-3` polygon, i.e. open water counted as single-family land. Lake Michigan is correctly excluded, being neither zoned nor in any ward. Both legends now state that water inside a district counts toward its area; no hydrography layer is available through the API to subtract it. M4 |
 | C4 | MultiPolygon inputs need no special handling | Holds | All 14,986 zoning and 50 ward features are MultiPolygon; `.area` sums parts correctly |
 
 ## D. Classification

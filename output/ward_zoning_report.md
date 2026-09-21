@@ -58,5 +58,7 @@
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
 
+Water inside a zoning district counts toward its area. The Chicago River and its branches run through zoned land rather than being cut out of it, so a little of each riverside ward's figure is river. Lake Michigan is not zoned and is excluded.
+
 **Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, which is zoned as a planned development. That pushes the ward's Planned Development figure up and its other figures down, so Ward 41 is not really comparable to the other wards in this table.
 

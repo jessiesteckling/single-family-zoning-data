@@ -27,6 +27,8 @@ EXPECTED_ALL_LAND_REPORT = """\
 - Apartments Allowed: B, C, DC, DR, DS, DX, RM, RT
 - Planned Development: PD (e.g. PD 23, PD 461)
 - Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
+
+Water inside a zoning district counts toward its area. The Chicago River and its branches run through zoned land rather than being cut out of it, so a little of each riverside ward's figure is river. Lake Michigan is not zoned and is excluded.
 """
 
 EXPECTED_RESIDENTIAL_REPORT = """\
@@ -44,6 +46,8 @@ EXPECTED_RESIDENTIAL_REPORT = """\
 Percentages are shares of land where residential is permitted or negotiable. \
 Zones allowing no housing (M, POS, PMD, T) are excluded from the denominator, \
 so a ward's figures here are higher than in the all-land table.
+
+Water inside a zoning district counts toward its area. The Chicago River and its branches run through zoned land rather than being cut out of it, so a little of each riverside ward's figure is river. Lake Michigan is not zoned and is excluded.
 """
 
 EXPECTED_OHARE_NOTE = (

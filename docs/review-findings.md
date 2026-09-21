@@ -188,14 +188,25 @@ the residential table still keeps PD in the denominator, so Ward 41 is still 68.
 development there and its single-family share still reads 27.7% rather than the 67.8% its
 non-airport land supports. The residential table does not change that.
 
-### M4. River surface water is counted as land, including as RS
+### M4. River surface water is counted as land, including as RS — disclosed
 
 Water inside zoning polygons is measured as area: Wolf Point river water falls in `PD 98`,
 Goose Island's east channel in `PMD 3`, and Bubbly Creek falls inside an `RS-3` polygon —
 open water counted as single-family land.
 
-Lake Michigan is correctly excluded, being neither zoned nor inside any ward. The effect
-is small, but "percentage of land" in CLAUDE.md and the README is imprecise.
+Lake Michigan is correctly excluded, being neither zoned nor inside any ward.
+
+Disclosed rather than fixed, deliberately. Both legends now say water inside a district
+counts toward its area. Subtracting it would need a hydrography layer, and the City's
+Waterways dataset (`eg9f-z3t6`) cannot supply one through the API: all 605 rows come back
+with no geometry and no properties, the shapes being a shapefile attachment on the dataset
+page. Using it would mean committing a downloaded file, which gives up the property that
+every run fetches fresh. An outside source such as the USGS National Hydrography Dataset
+would be a second data vintage.
+
+The size of the effect is unmeasured for the same reason. The Chicago River system inside
+the city is on the order of 1 sq mi against 231, so well under 1% citywide, but it would
+concentrate in wards 2, 11, 27 and 42 rather than spreading evenly.
 
 ### M5. The "Single-Family Only" column label overstates RS
 

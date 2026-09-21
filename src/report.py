@@ -51,11 +51,19 @@ OHARE_NOTE = (
 )
 
 
+_WATER_NOTE = (
+    "Water inside a zoning district counts toward its area. The Chicago River and its "
+    "branches run through zoned land rather than being cut out of it, so a little of "
+    "each riverside ward's figure is river. Lake Michigan is not zoned and is excluded."
+)
+
+
 def _legend(categories: list[str]) -> str:
     lines = ["**Zoning codes by column:**"]
     lines += [_LEGEND_LINES[c] for c in categories]
     if OTHER not in categories:
         lines += ["", _EXCLUDED_NOTE]
+    lines += ["", _WATER_NOTE]
     return "\n".join(lines)
 
 

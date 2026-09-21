@@ -1,74 +1,145 @@
-"""Mock Chicago Data Portal responses, shaped exactly like the real ones.
+"""Mock Chicago Data Portal responses, written out exactly as they arrive.
 
-The geography is a toy city two wards wide, laid out so the numbers the
-pipeline should produce are obvious by inspection:
+The geography is a toy city two wards wide:
 
-    lon  -87.70      -87.675     -87.65      -87.625     -87.60
+    lon  -87.700     -87.675     -87.650     -87.625     -87.600
           |-----------|-----------|-----------|-----------|
           |   RS-3    |         RT-4          |   M1-1    |
           |-------- ward 1 -------|-------- ward 2 -------|
+    lat 41.800 (south) .. 41.900 (north) throughout
 
-RT-4 deliberately straddles the ward line. Splitting it is the whole reason the
-pipeline runs a spatial overlay instead of a spatial join, so every ward should
-come out half single-family-or-other and half apartments-allowed.
+RT-4 deliberately straddles the ward line at -87.650. Splitting it is the whole
+reason the pipeline runs a spatial overlay instead of a spatial join, so both
+wards should come out half apartments-allowed.
+
+Every polygon is 0.025 or 0.050 degrees wide and they all share the same
+latitude band, so the expected percentages are exact halves.
+
+These are literals rather than generated shapes so that what the portal sends
+and what the pipeline should make of it can both be read off the page. Tests
+that modify a response must `copy.deepcopy` it first.
 """
 
-WARD_BOUNDARY_LON = -87.65
-LAT_SOUTH, LAT_NORTH = 41.80, 41.90
-
-
-def _box(west: float, east: float) -> dict:
-    """A MultiPolygon spanning the full north-south extent, as the portal sends
-    it: one ring, counter-clockwise, [lon, lat] pairs.
-    """
-    ring = [
-        [west, LAT_SOUTH],
-        [east, LAT_SOUTH],
-        [east, LAT_NORTH],
-        [west, LAT_NORTH],
-        [west, LAT_SOUTH],
-    ]
-    return {"type": "MultiPolygon", "coordinates": [[ring]]}
-
-
-def feature(geometry: dict, **properties) -> dict:
-    return {"type": "Feature", "geometry": geometry, "properties": properties}
-
-
-def collection(features: list[dict]) -> dict:
-    """A FeatureCollection with the `crs` member the portal really sends.
-
-    The member sits beside `features`, not inside it, which is why
-    `fetch_geojson` has to supply the CRS itself.
-    """
-    return {
-        "type": "FeatureCollection",
-        "features": features,
-        "crs": {
-            "type": "name",
-            "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"},
+ZONING_RESPONSE = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [-87.700, 41.800],
+                            [-87.675, 41.800],
+                            [-87.675, 41.900],
+                            [-87.700, 41.900],
+                            [-87.700, 41.800],
+                        ]
+                    ]
+                ],
+            },
+            "properties": {"zone_class": "RS-3", "objectid": "1"},
         },
-    }
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [-87.675, 41.800],
+                            [-87.625, 41.800],
+                            [-87.625, 41.900],
+                            [-87.675, 41.900],
+                            [-87.675, 41.800],
+                        ]
+                    ]
+                ],
+            },
+            "properties": {"zone_class": "RT-4", "objectid": "2"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [-87.625, 41.800],
+                            [-87.600, 41.800],
+                            [-87.600, 41.900],
+                            [-87.625, 41.900],
+                            [-87.625, 41.800],
+                        ]
+                    ]
+                ],
+            },
+            "properties": {"zone_class": "M1-1", "objectid": "3"},
+        },
+    ],
+    "crs": {
+        "type": "name",
+        "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"},
+    },
+}
 
+WARDS_RESPONSE = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [-87.700, 41.800],
+                            [-87.650, 41.800],
+                            [-87.650, 41.900],
+                            [-87.700, 41.900],
+                            [-87.700, 41.800],
+                        ]
+                    ]
+                ],
+            },
+            "properties": {"ward": "1", "objectid": "10"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [-87.650, 41.800],
+                            [-87.600, 41.800],
+                            [-87.600, 41.900],
+                            [-87.650, 41.900],
+                            [-87.650, 41.800],
+                        ]
+                    ]
+                ],
+            },
+            "properties": {"ward": "2", "objectid": "20"},
+        },
+    ],
+    "crs": {
+        "type": "name",
+        "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"},
+    },
+}
 
-def zoning_features() -> list[dict]:
-    return [
-        feature(_box(-87.700, -87.675), zone_class="RS-3", objectid="1"),
-        feature(_box(-87.675, -87.625), zone_class="RT-4", objectid="2"),
-        feature(_box(-87.625, -87.600), zone_class="M1-1", objectid="3"),
-    ]
+# The same zoning data split across two pages, for the pagination tests. A page
+# is a complete FeatureCollection, crs member and all.
+ZONING_PAGE_1 = {
+    "type": "FeatureCollection",
+    "features": ZONING_RESPONSE["features"][:2],
+    "crs": ZONING_RESPONSE["crs"],
+}
 
-
-def ward_features() -> list[dict]:
-    return [
-        feature(_box(-87.700, WARD_BOUNDARY_LON), ward="1", objectid="10"),
-        feature(_box(WARD_BOUNDARY_LON, -87.600), ward="2", objectid="20"),
-    ]
-
-
-def zoning_response() -> dict:
-    return collection(zoning_features())
-
-
-def ward_response() -> dict:
-    return collection(ward_features())
+ZONING_PAGE_2 = {
+    "type": "FeatureCollection",
+    "features": ZONING_RESPONSE["features"][2:],
+    "crs": ZONING_RESPONSE["crs"],
+}

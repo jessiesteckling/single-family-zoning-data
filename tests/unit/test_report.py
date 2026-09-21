@@ -5,102 +5,103 @@ import unittest
 import geopandas as gpd
 
 from src.analyze import (
+    OhareContext,
     compute_citywide_category_shares,
     compute_ward_category_shares,
     restrict_category_shares,
     restrict_ward_shares,
 )
-from src.categorize import CATEGORY_ORDER, RESIDENTIAL_CATEGORY_ORDER
+from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import SOURCE_CRS
 from src.report import format_ward_report, ohare_note
-from src.analyze import OhareContext
 from tests.unit import fixtures
 
+EXPECTED_ALL_LAND_REPORT = """\
+| Ward | Single-Family Only | Apartments Allowed | Planned Development | Other |
+|---|---|---|---|---|
+| **All Chicago** | **25.0%** | **50.0%** | **0.0%** | **25.0%** |
+| 1 | 50.0% | 50.0% | 0.0% | 0.0% |
+| 2 | 0.0% | 50.0% | 0.0% | 50.0% |
 
-def _frame(features):
-    return gpd.GeoDataFrame.from_features(features, crs=SOURCE_CRS)
+**Zoning codes by column:**
+- Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
+- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Planned Development: PD (e.g. PD 23, PD 461)
+- Other: everything else (e.g. M, POS, PMD, T) -- no residential allowed
+"""
+
+EXPECTED_RESIDENTIAL_REPORT = """\
+| Ward | Single-Family Only | Apartments Allowed | Planned Development |
+|---|---|---|---|
+| **All Chicago** | **33.3%** | **66.7%** | **0.0%** |
+| 1 | 50.0% | 50.0% | 0.0% |
+| 2 | 0.0% | 100.0% | 0.0% |
+
+**Zoning codes by column:**
+- Single-Family Only: RS (e.g. RS-1, RS-2, RS-3)
+- Apartments Allowed: B, C, DC, DR, DX, RM, RT
+- Planned Development: PD (e.g. PD 23, PD 461)
+
+Percentages are shares of land where residential is permitted or negotiable. \
+Zones allowing no housing (M, POS, PMD, T) are excluded from the denominator, \
+so a ward's figures here are higher than in the all-land table.
+"""
+
+EXPECTED_OHARE_NOTE = (
+    "**Ward 7 and O'Hare.** One polygon, zone_class `PD 0`, covers the airport: "
+    "10.3 sq mi, 32% of all Planned Development land in the city and 60% of "
+    "Ward 7 by area. It is classified correctly -- the zoning ordinance "
+    "designates land within the Airport Layout Plan the Airport Planned "
+    "Development -- but it dominates Ward 7's denominator and deflates every "
+    "other figure in that row, so that ward is not comparable to the rest on "
+    "this table. O'Hare falls entirely within Ward 7; no other ward is "
+    "affected.\n"
+)
+
+
+def _frame(response):
+    return gpd.GeoDataFrame.from_features(response["features"], crs=SOURCE_CRS)
 
 
 class ReportTests(unittest.TestCase):
     def setUp(self):
-        zoning = _frame(fixtures.zoning_features())
-        wards = _frame(fixtures.ward_features())
-        self.shares = compute_ward_category_shares(zoning, wards)
-        self.citywide = compute_citywide_category_shares(zoning)
-        self.report = format_ward_report(self.shares, self.citywide)
-        self.lines = self.report.splitlines()
+        self.zoning = _frame(fixtures.ZONING_RESPONSE)
+        self.wards = _frame(fixtures.WARDS_RESPONSE)
+        self.shares = compute_ward_category_shares(self.zoning, self.wards)
+        self.citywide = compute_citywide_category_shares(self.zoning)
 
-    def test_header_names_every_category(self):
-        header = self.lines[0]
-        for label in ("Single-Family Only", "Apartments Allowed",
-                      "Planned Development", "Other"):
-            self.assertIn(label, header)
-
-    def test_separator_matches_the_column_count(self):
-        self.assertEqual(self.lines[1].count("---"), len(CATEGORY_ORDER) + 1)
-
-    def test_citywide_row_comes_first_and_is_bold(self):
-        self.assertTrue(self.lines[2].startswith("| **All Chicago** |"))
-        self.assertIn("**", self.lines[2])
-
-    def test_one_row_per_ward_after_the_citywide_row(self):
-        ward_rows = [ln for ln in self.lines if ln.startswith("| 1 |")
-                     or ln.startswith("| 2 |")]
-        self.assertEqual(len(ward_rows), 2)
-
-    def test_percentages_render_to_one_decimal(self):
-        self.assertIn("50.0%", self.report)
-
-    def test_legend_is_appended(self):
-        self.assertIn("**Zoning codes by column:**", self.report)
-
-
-class ResidentialReportTests(unittest.TestCase):
-    def setUp(self):
-        zoning = _frame(fixtures.zoning_features())
-        wards = _frame(fixtures.ward_features())
-        shares = restrict_ward_shares(
-            compute_ward_category_shares(zoning, wards), RESIDENTIAL_CATEGORY_ORDER
-        )
-        citywide = restrict_category_shares(
-            compute_citywide_category_shares(zoning), RESIDENTIAL_CATEGORY_ORDER
-        )
-        self.report = format_ward_report(
-            shares, citywide, categories=RESIDENTIAL_CATEGORY_ORDER, title="Residential"
+    def test_the_whole_all_land_report(self):
+        self.assertEqual(
+            format_ward_report(self.shares, self.citywide), EXPECTED_ALL_LAND_REPORT
         )
 
-    def test_the_other_column_is_gone(self):
-        header = self.report.splitlines()[2]
-        self.assertNotIn("| Other |", header)
+    def test_the_whole_residential_report(self):
+        report = format_ward_report(
+            restrict_ward_shares(self.shares, RESIDENTIAL_CATEGORY_ORDER),
+            restrict_category_shares(self.citywide, RESIDENTIAL_CATEGORY_ORDER),
+            categories=RESIDENTIAL_CATEGORY_ORDER,
+        )
+        self.assertEqual(report, EXPECTED_RESIDENTIAL_REPORT)
 
-    def test_it_says_what_the_percentages_are_shares_of(self):
-        self.assertIn("residential is permitted or negotiable", self.report)
+    def test_a_title_becomes_a_heading_above_the_table(self):
+        report = format_ward_report(self.shares, self.citywide, title="Toy City")
+        self.assertEqual(report, "# Toy City\n\n" + EXPECTED_ALL_LAND_REPORT)
 
-    def test_the_title_becomes_a_heading(self):
-        self.assertTrue(self.report.startswith("# Residential"))
+    def test_notes_are_appended_after_the_legend(self):
+        report = format_ward_report(
+            self.shares, self.citywide, notes=["**A footnote.**"]
+        )
+        self.assertEqual(report, EXPECTED_ALL_LAND_REPORT + "\n**A footnote.**\n")
 
 
 class FootnoteTests(unittest.TestCase):
-    def test_every_figure_in_the_ohare_note_comes_from_the_context(self):
+    def test_every_figure_in_the_note_comes_from_the_context(self):
         note = ohare_note(
             OhareContext(
                 ward=7, area_sq_mi=10.32, pct_of_planned_dev=32.0, pct_of_ward=60.0
             )
         )
-        self.assertIn("Ward 7", note)
-        self.assertIn("10.3 sq mi", note)
-        self.assertIn("32%", note)
-        self.assertIn("60%", note)
-
-    def test_notes_are_appended_to_the_report(self):
-        report = format_ward_report(
-            compute_ward_category_shares(
-                _frame(fixtures.zoning_features()), _frame(fixtures.ward_features())
-            ),
-            compute_citywide_category_shares(_frame(fixtures.zoning_features())),
-            notes=["**A footnote.**"],
-        )
-        self.assertIn("**A footnote.**", report)
+        self.assertEqual(note, EXPECTED_OHARE_NOTE)
 
 
 if __name__ == "__main__":

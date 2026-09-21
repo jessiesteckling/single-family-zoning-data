@@ -1,5 +1,6 @@
 """How two sets of polygons become a percentage per ward."""
 
+import copy
 import unittest
 
 import geopandas as gpd
@@ -11,98 +12,130 @@ from src.analyze import (
     restrict_category_shares,
     restrict_ward_shares,
 )
-from src.categorize import (
-    ALLOWED,
-    NOT_ALLOWED,
-    OTHER,
-    PLANNED_DEV,
-    RESIDENTIAL_CATEGORY_ORDER,
-)
+from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import SOURCE_CRS
 from tests.unit import fixtures
 
+NOT_ALLOWED = "Apartments & condos not allowed (RS)"
+ALLOWED = "Apartments & condos allowed"
+PLANNED_DEV = "Planned Developments"
+OTHER = "All other zones (no residential allowed)"
 
-def _frame(features):
-    return gpd.GeoDataFrame.from_features(features, crs=SOURCE_CRS)
+
+def _frame(response):
+    return gpd.GeoDataFrame.from_features(response["features"], crs=SOURCE_CRS)
+
+
+def _rows(shares):
+    """The share table as plain tuples, rounded past projection noise."""
+    return [
+        (int(r.ward), r.category, round(r.pct, 2)) for r in shares.itertuples()
+    ]
 
 
 class WardShareTests(unittest.TestCase):
-    def setUp(self):
-        self.zoning = _frame(fixtures.zoning_features())
-        self.wards = _frame(fixtures.ward_features())
-        self.shares = compute_ward_category_shares(self.zoning, self.wards)
+    def test_the_whole_table(self):
+        # Ward 1 is RS-3 (0.025 deg) plus the left half of RT-4 (0.025 deg).
+        # Ward 2 is the right half of RT-4 (0.025) plus M1-1 (0.025).
+        shares = compute_ward_category_shares(
+            _frame(fixtures.ZONING_RESPONSE), _frame(fixtures.WARDS_RESPONSE)
+        )
 
-    def _pct(self, ward, category):
-        row = self.shares[
-            (self.shares["ward"] == ward) & (self.shares["category"] == category)
-        ]
-        return row["pct"].iloc[0]
+        self.assertEqual(
+            _rows(shares),
+            [
+                (1, NOT_ALLOWED, 50.0),
+                (1, ALLOWED, 50.0),
+                (1, PLANNED_DEV, 0.0),
+                (1, OTHER, 0.0),
+                (2, NOT_ALLOWED, 0.0),
+                (2, ALLOWED, 50.0),
+                (2, PLANNED_DEV, 0.0),
+                (2, OTHER, 50.0),
+            ],
+        )
 
     def test_a_district_straddling_the_ward_line_is_split_between_both(self):
-        # RT-4 spans the boundary, so each ward gets half of it. Without the
-        # overlay the whole district would land in one ward or be counted twice.
-        self.assertAlmostEqual(self._pct(1, ALLOWED), 50.0, places=1)
-        self.assertAlmostEqual(self._pct(2, ALLOWED), 50.0, places=1)
+        # RT-4 is the only apartments-allowed district and it spans the
+        # boundary, so 50% in each ward is it being halved. A spatial join
+        # would instead give one ward 100% and the other 0%.
+        shares = compute_ward_category_shares(
+            _frame(fixtures.ZONING_RESPONSE), _frame(fixtures.WARDS_RESPONSE)
+        )
+        allowed = [r for r in _rows(shares) if r[1] == ALLOWED]
 
-    def test_districts_inside_one_ward_stay_there(self):
-        self.assertAlmostEqual(self._pct(1, NOT_ALLOWED), 50.0, places=1)
-        self.assertAlmostEqual(self._pct(2, NOT_ALLOWED), 0.0, places=1)
-        self.assertAlmostEqual(self._pct(2, OTHER), 50.0, places=1)
+        self.assertEqual(allowed, [(1, ALLOWED, 50.0), (2, ALLOWED, 50.0)])
 
-    def test_every_ward_gets_a_row_for_every_category(self):
-        self.assertEqual(len(self.shares), 2 * 4)
-        self.assertEqual(list(self.shares.columns), ["ward", "category", "pct"])
+    def test_columns_and_row_count(self):
+        shares = compute_ward_category_shares(
+            _frame(fixtures.ZONING_RESPONSE), _frame(fixtures.WARDS_RESPONSE)
+        )
+        self.assertEqual(list(shares.columns), ["ward", "category", "pct"])
+        self.assertEqual(len(shares), 8)
 
-    def test_each_ward_sums_to_100(self):
-        for ward, total in self.shares.groupby("ward")["pct"].sum().items():
-            with self.subTest(ward=ward):
-                self.assertAlmostEqual(total, 100.0, places=6)
+
+class CitywideShareTests(unittest.TestCase):
+    def test_the_whole_series(self):
+        # Across the toy city: RS-3 0.025, RT-4 0.050, M1-1 0.025 of 0.100.
+        citywide = compute_citywide_category_shares(_frame(fixtures.ZONING_RESPONSE))
+
+        self.assertEqual(
+            [(k, round(v, 2)) for k, v in citywide.items()],
+            [
+                (NOT_ALLOWED, 25.0),
+                (ALLOWED, 50.0),
+                (PLANNED_DEV, 0.0),
+                (OTHER, 25.0),
+            ],
+        )
 
 
 class RestrictedShareTests(unittest.TestCase):
-    def test_dropping_other_renormalises_the_rest_to_100(self):
+    def test_the_whole_restricted_table(self):
+        # Ward 2 loses its M1-1 half, so its remaining RT-4 becomes all of it.
         shares = compute_ward_category_shares(
-            _frame(fixtures.zoning_features()), _frame(fixtures.ward_features())
+            _frame(fixtures.ZONING_RESPONSE), _frame(fixtures.WARDS_RESPONSE)
         )
         restricted = restrict_ward_shares(shares, RESIDENTIAL_CATEGORY_ORDER)
 
-        self.assertNotIn(OTHER, set(restricted["category"]))
-        for ward, total in restricted.groupby("ward")["pct"].sum().items():
-            with self.subTest(ward=ward):
-                self.assertAlmostEqual(total, 100.0, places=6)
-
-    def test_ward_2_is_all_apartments_once_industrial_land_is_excluded(self):
-        # Ward 2 is half RT-4 and half M1-1. Drop the M and the RT is all of it.
-        shares = compute_ward_category_shares(
-            _frame(fixtures.zoning_features()), _frame(fixtures.ward_features())
+        self.assertEqual(
+            _rows(restricted),
+            [
+                (1, NOT_ALLOWED, 50.0),
+                (1, ALLOWED, 50.0),
+                (1, PLANNED_DEV, 0.0),
+                (2, NOT_ALLOWED, 0.0),
+                (2, ALLOWED, 100.0),
+                (2, PLANNED_DEV, 0.0),
+            ],
         )
-        restricted = restrict_ward_shares(shares, RESIDENTIAL_CATEGORY_ORDER)
-        row = restricted[
-            (restricted["ward"] == 2) & (restricted["category"] == ALLOWED)
-        ]
-        self.assertAlmostEqual(row["pct"].iloc[0], 100.0, places=6)
 
-    def test_citywide_restriction_matches(self):
-        citywide = compute_citywide_category_shares(_frame(fixtures.zoning_features()))
+    def test_the_whole_restricted_citywide_series(self):
+        citywide = compute_citywide_category_shares(_frame(fixtures.ZONING_RESPONSE))
         restricted = restrict_category_shares(citywide, RESIDENTIAL_CATEGORY_ORDER)
-        self.assertAlmostEqual(restricted.sum(), 100.0, places=6)
-        self.assertNotIn(OTHER, restricted.index)
+
+        self.assertEqual(
+            [(k, round(v, 2)) for k, v in restricted.items()],
+            [
+                (NOT_ALLOWED, 33.33),
+                (ALLOWED, 66.67),
+                (PLANNED_DEV, 0.0),
+            ],
+        )
 
 
 class OhareContextTests(unittest.TestCase):
     def test_it_finds_the_ward_holding_the_airport_polygon(self):
-        features = fixtures.zoning_features()
-        # Re-label the ward-2-only district as the airport placeholder.
-        features[2]["properties"]["zone_class"] = "PD 0"
+        zoning = copy.deepcopy(fixtures.ZONING_RESPONSE)
+        zoning["features"][2]["properties"]["zone_class"] = "PD 0"  # the M1-1 block
 
         context = compute_ohare_context(
-            _frame(features), _frame(fixtures.ward_features())
+            _frame(zoning), _frame(fixtures.WARDS_RESPONSE)
         )
 
         self.assertEqual(context.ward, 2)
-        self.assertAlmostEqual(context.pct_of_planned_dev, 100.0, places=6)
-        self.assertAlmostEqual(context.pct_of_ward, 50.0, places=1)
-        self.assertGreater(context.area_sq_mi, 0)
+        self.assertEqual(round(context.pct_of_planned_dev, 2), 100.0)
+        self.assertEqual(round(context.pct_of_ward, 2), 50.0)
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from src.analyze import (
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import SOURCE_CRS
-from src.report import format_ward_report, ohare_note
+from src.report import OHARE_NOTE, format_ward_report
 from tests.unit import fixtures
 
 EXPECTED_ALL_LAND_REPORT = """\
@@ -47,10 +47,10 @@ so a ward's figures here are higher than in the all-land table.
 """
 
 EXPECTED_OHARE_NOTE = (
-    "**Ward 7 and O'Hare.** Most of Ward 7 is taken up by O'Hare Airport, which "
-    "is zoned as a planned development. That pushes the ward's Planned "
-    "Development figure up and its other figures down, so Ward 7 is not really "
-    "comparable to the other wards in this table.\n"
+    "**Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, "
+    "which is zoned as a planned development. That pushes the ward's Planned "
+    "Development figure up and its other figures down, so Ward 41 is not "
+    "really comparable to the other wards in this table.\n"
 )
 
 
@@ -90,8 +90,8 @@ class ReportTests(unittest.TestCase):
 
 
 class FootnoteTests(unittest.TestCase):
-    def test_the_note_names_the_ward_it_is_given(self):
-        self.assertEqual(ohare_note(7), EXPECTED_OHARE_NOTE)
+    def test_the_note_reads_as_expected(self):
+        self.assertEqual(OHARE_NOTE, EXPECTED_OHARE_NOTE)
 
 
 if __name__ == "__main__":

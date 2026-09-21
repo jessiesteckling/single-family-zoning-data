@@ -49,12 +49,3 @@ PROJECTED_CRS = "EPSG:3435"
 # 5,280 feet to a mile, squared -> 27,878,400. PROJECTED_CRS is in feet, so
 # every area arrives in square feet and divides by this to be readable.
 SQ_FEET_PER_SQ_MILE = 5280**2
-
-# --- Data quirks -------------------------------------------------------------
-
-# O'Hare. A single polygon of 10.3 sq mi, correctly classified as a planned
-# development: the zoning ordinance places land within the Airport Layout Plan
-# in the Airport Planned Development of 1964-01-23. It is large enough to be 60%
-# of ward 41 and 32% of all planned-development land citywide, which distorts
-# that ward's row badly enough that both reports footnote it.
-OHARE_ZONE_CLASS = "PD 0"

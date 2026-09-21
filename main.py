@@ -10,7 +10,6 @@ from pathlib import Path
 
 from src.analyze import (
     compute_citywide_category_shares,
-    find_ohare_ward,
     compute_ward_category_shares,
     rescale_category_shares_to,
     rescale_ward_shares_to,
@@ -18,7 +17,7 @@ from src.analyze import (
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
 from src.constants import WARDS_DATASET_ID, ZONING_DATASET_ID
 from src.fetch_data import fetch_geojson
-from src.report import format_ward_report, ohare_note
+from src.report import OHARE_NOTE, format_ward_report
 
 # Relative to the working directory, so run this from the repository root.
 PROCESSED_DIR = Path("data/processed")
@@ -32,7 +31,7 @@ def main() -> None:
     ward_pct = compute_ward_category_shares(zoning, wards)
     citywide_pct = compute_citywide_category_shares(zoning)
 
-    notes = [ohare_note(find_ohare_ward(zoning, wards))]
+    notes = [OHARE_NOTE]
 
     # The residential report is the same table rescaled, not a second analysis:
     # drop the "Other" column and renormalise the remaining three to 100.

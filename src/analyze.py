@@ -6,7 +6,7 @@ import geopandas as gpd
 import pandas as pd
 
 from .categorize import CATEGORY_ORDER, categorize
-from .constants import OHARE_ZONE_CLASS, PROJECTED_CRS
+from .constants import PROJECTED_CRS
 
 
 def compute_ward_category_shares(
@@ -100,16 +100,3 @@ def rescale_category_shares_to(
     """
     kept = citywide.reindex(categories)
     return kept / kept.sum() * 100
-
-
-def find_ohare_ward(zoning: gpd.GeoDataFrame, wards: gpd.GeoDataFrame) -> int:
-    """The ward O'Hare sits in, so the footnote can name it rather than hardcode it."""
-    zoning = zoning[["zone_class", "geometry"]].to_crs(PROJECTED_CRS)
-    wards = wards[["ward", "geometry"]].copy()
-    wards["ward"] = wards["ward"].astype(int)
-    wards = wards.to_crs(PROJECTED_CRS)
-
-    ohare = zoning[zoning["zone_class"] == OHARE_ZONE_CLASS]
-    in_wards = gpd.overlay(ohare, wards, how="intersection")
-    area_sq_ft = in_wards.assign(area=in_wards.geometry.area)
-    return int(area_sq_ft.groupby("ward")["area"].sum().idxmax())

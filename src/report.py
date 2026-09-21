@@ -41,14 +41,14 @@ _EXCLUDED_NOTE = (
 )
 
 
-def ohare_note(ward: int) -> str:
-    """Footnote warning that one ward is mostly an airport."""
-    return (
-        f"**Ward {ward} and O'Hare.** Most of Ward {ward} is taken up by O'Hare "
-        "Airport, which is zoned as a planned development. That pushes the ward's "
-        "Planned Development figure up and its other figures down, so Ward "
-        f"{ward} is not really comparable to the other wards in this table.\n"
-    )
+# Ward 41 is mostly airport, which makes its row read oddly. Hardcoded because
+# the ward holding O'Hare is not going to move.
+OHARE_NOTE = (
+    "**Ward 41 and O'Hare.** Most of Ward 41 is taken up by O'Hare Airport, "
+    "which is zoned as a planned development. That pushes the ward's Planned "
+    "Development figure up and its other figures down, so Ward 41 is not "
+    "really comparable to the other wards in this table.\n"
+)
 
 
 def _legend(categories: list[str]) -> str:

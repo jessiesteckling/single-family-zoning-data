@@ -3,8 +3,6 @@
 import unittest
 from unittest.mock import patch
 
-import pyproj
-
 from src import fetch_data
 from src.constants import SOURCE_CRS
 from tests.unit import fixtures
@@ -46,7 +44,7 @@ class FetchGeojsonTests(unittest.TestCase):
         with _patch_get([payload]):
             gdf = fetch_data.fetch_geojson("dj47-wfun")
 
-        self.assertEqual(gdf.crs, pyproj.CRS.from_user_input(declared))
+        self.assertEqual(gdf.crs, declared)
 
     def test_a_response_with_no_crs_member_falls_back(self):
         payload = fixtures.zoning_response()
@@ -64,7 +62,7 @@ class FetchGeojsonTests(unittest.TestCase):
         with _patch_get([payload]):
             gdf = fetch_data.fetch_geojson("dj47-wfun")
 
-        self.assertEqual(gdf.crs.to_epsg(), 3435)
+        self.assertEqual(gdf.crs, "EPSG:3435")
 
     def test_the_declaration_is_read_from_the_first_page_only(self):
         first = fixtures.collection(fixtures.zoning_features()[:2])

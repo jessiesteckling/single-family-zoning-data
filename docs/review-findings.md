@@ -71,7 +71,7 @@ so `DS` was added to `ALLOWED_PREFIXES`. C3 is left alone because the two depart
 opposite directions and correcting only one moves the totals further from the source, not
 closer.
 
-### H4. Paginated fetch omits `$order` — latent, does not currently reproduce
+### H4. Paginated fetch omits `$order` — resolved
 
 `src/fetch_data.py`
 
@@ -95,12 +95,13 @@ sets:
 Both match `$select=count(*)` = 14,986 exactly, and neither run contains a row the other
 lacks. So the committed output is not affected, and no data was lost to this.
 
-It remains worth fixing. The vendor gives no ordering guarantee, so the current behavior is
-correct by luck rather than by contract, and it could break under concurrent writes to the
-dataset or a backend change — silently, since nothing would detect it. `&$order=:id` costs
-nothing.
+Re-tested on 2026-09-21 across three consecutive runs: the portal's default ordering is
+already `:id`, byte for byte, so nothing was ever at risk in practice.
 
-### H5. A short page is treated as end-of-data, so truncation is silent
+Resolved anyway. The vendor gives no ordering guarantee, so relying on that was correct by
+implementation detail rather than by contract. `fetch_geojson` now sends `&$order=:id`.
+
+### H5. A short page is treated as end-of-data, so truncation is silent — resolved
 
 `src/fetch_data.py`
 
@@ -111,8 +112,11 @@ produces plausible percentages from a truncated dataset with no warning.
 Verified 2026-09-20 that this did not bite: `$select=count(*)` returns 14,986 and a full
 live download yields exactly 14,986 features. The risk is latent, not realised.
 
-Still worth an assertion, since that check is the only thing that would ever surface it.
-Compare the assembled feature count against `$select=count(*)` before returning.
+Resolved. `fetch_geojson` now asks `$select=count(*)` first and raises if the assembled
+feature count disagrees, so a truncated download fails loudly instead of producing
+plausible percentages. Note what this does and does not cover: it catches a download that
+comes up short or long, but not a page boundary that repeats some rows while skipping an
+equal number. `$order=:id` under H4 is what prevents that case.
 
 ### H6. README claims the run fetches current data; it does not — resolved
 
@@ -295,10 +299,7 @@ Resolved by `Pipfile` / `Pipfile.lock`, which declare the three direct imports
 
 ## Suggested fix order
 
-1. H4 and H5. Neither is realised — both verified clean against the live API on
-   2026-09-20 — but they are the only guards on input integrity, and both fixes are one
-   line.
-2. H2 and M1. The one remaining classification error the report asserts as fact, plus the
+1. H2 and M1. The one remaining classification error the report asserts as fact, plus the
    citywide row not aggregating the table beneath it.
 3. M3, M2, M4 and M5. Denominator and label semantics — cheap to state, and the reason
    40.3% is easy to misread.

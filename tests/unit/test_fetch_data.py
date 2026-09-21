@@ -3,6 +3,8 @@
 import unittest
 from unittest.mock import patch
 
+import pyproj
+
 from src import fetch_data
 from src.constants import SOURCE_CRS
 from tests.unit import fixtures
@@ -37,15 +39,42 @@ class FetchGeojsonTests(unittest.TestCase):
         )
         self.assertEqual(set(gdf.geometry.geom_type), {"MultiPolygon"})
 
-    def test_crs_is_supplied_even_though_the_response_member_is_discarded(self):
+    def test_crs_comes_from_what_the_response_declares(self):
         payload = fixtures.zoning_response()
-        self.assertIn("crs", payload)  # the portal does declare it ...
+        declared = payload["crs"]["properties"]["name"]
 
         with _patch_get([payload]):
             gdf = fetch_data.fetch_geojson("dj47-wfun")
 
-        # ... but only payload["features"] survives, so the CRS comes from us.
+        self.assertEqual(gdf.crs, pyproj.CRS.from_user_input(declared))
+
+    def test_a_response_with_no_crs_member_falls_back(self):
+        payload = fixtures.zoning_response()
+        del payload["crs"]
+
+        with _patch_get([payload]):
+            gdf = fetch_data.fetch_geojson("dj47-wfun")
+
         self.assertEqual(gdf.crs, SOURCE_CRS)
+
+    def test_a_declared_crs_that_is_not_wgs84_is_honoured(self):
+        payload = fixtures.zoning_response()
+        payload["crs"]["properties"]["name"] = "urn:ogc:def:crs:EPSG::3435"
+
+        with _patch_get([payload]):
+            gdf = fetch_data.fetch_geojson("dj47-wfun")
+
+        self.assertEqual(gdf.crs.to_epsg(), 3435)
+
+    def test_the_declaration_is_read_from_the_first_page_only(self):
+        first = fixtures.collection(fixtures.zoning_features()[:2])
+        second = fixtures.collection(fixtures.zoning_features()[2:])
+        del second["crs"]  # a later page dropping it must not clear the CRS
+
+        with patch.object(fetch_data, "PAGE_SIZE", 2), _patch_get([first, second]):
+            gdf = fetch_data.fetch_geojson("dj47-wfun")
+
+        self.assertIsNotNone(gdf.crs)
 
     def test_pages_until_a_short_page_arrives(self):
         full = fixtures.collection(fixtures.zoning_features()[:2])

@@ -28,11 +28,10 @@ PAGE_SIZE = 5000
 # not a fixed distance -- one degree of longitude covers about 52 miles in
 # Chicago, against about 69 miles for a degree of latitude.
 #
-# We state it here rather than reading it off the response. The portal does
-# label its data, but the label is a `crs` key at the top level of the response,
-# sitting alongside the `features` list rather than inside it. `fetch_geojson`
-# keeps only that list, because it has to join the features from several pages
-# into one, so the label is gone before geopandas ever sees the shapes.
+# Only a fallback. `fetch_geojson` uses whatever the response declares in its
+# top-level `crs` key -- currently "urn:ogc:def:crs:OGC:1.3:CRS84", which the
+# portal documents. This applies when that key is absent, which the current
+# GeoJSON spec allows, having dropped the member and fixed the format to WGS84.
 # (WGS84 longitude/latitude.)
 SOURCE_CRS = "EPSG:4326"
 

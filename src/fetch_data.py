@@ -12,8 +12,13 @@ from .constants import DATA_PORTAL_BASE_URL, PAGE_SIZE, SOURCE_CRS
 
 
 def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
-    """Return a dataset as a GeoDataFrame, paginating through the portal API."""
+    """Return a dataset as a GeoDataFrame, paginating through the portal API.
+
+    The CRS comes from whatever the response declares, falling back to
+    SOURCE_CRS when it declares nothing.
+    """
     features = []
+    declared_crs = None
     offset = 0
     while True:
         url = (
@@ -22,10 +27,18 @@ def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
         )
         response = requests.get(url, timeout=60)
         response.raise_for_status()
-        page_features = response.json()["features"]
+        payload = response.json()
+        declared_crs = declared_crs or _declared_crs(payload)
+        page_features = payload["features"]
         features.extend(page_features)
         if len(page_features) < PAGE_SIZE:
             break
         offset += PAGE_SIZE
 
-    return gpd.GeoDataFrame.from_features(features, crs=SOURCE_CRS)
+    return gpd.GeoDataFrame.from_features(features, crs=declared_crs or SOURCE_CRS)
+
+
+def _declared_crs(payload: dict) -> str | None:
+    """The CRS named in a response, or None if it does not name one."""
+    crs = payload.get("crs") or {}
+    return (crs.get("properties") or {}).get("name")

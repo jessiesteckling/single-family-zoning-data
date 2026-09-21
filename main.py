@@ -6,6 +6,8 @@ where residential is permitted or negotiable, which is the better basis for
 reading a ward's true single-family share.
 """
 
+from pathlib import Path
+
 from src.analyze import (
     compute_citywide_category_shares,
     compute_ohare_context,
@@ -14,14 +16,13 @@ from src.analyze import (
     restrict_ward_shares,
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
-from src.constants import (
-    OUTPUT_DIR,
-    PROCESSED_DIR,
-    WARDS_DATASET_ID,
-    ZONING_DATASET_ID,
-)
+from src.constants import WARDS_DATASET_ID, ZONING_DATASET_ID
 from src.fetch_data import fetch_geojson
 from src.report import format_ward_report, ohare_note
+
+# Relative to the working directory, so run this from the repository root.
+PROCESSED_DIR = Path("data/processed")
+OUTPUT_DIR = Path("output")
 
 
 def main() -> None:

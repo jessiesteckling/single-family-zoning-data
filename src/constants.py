@@ -1,25 +1,23 @@
-"""Shared configuration: dataset identifiers, API settings, coordinate systems,
-unit conversions and output locations.
+"""Shared configuration: dataset identifiers, API settings, coordinate systems
+and unit conversions.
 
 What belongs here is cross-cutting -- used by more than one module, or a value
 worth stating once so a change lands everywhere. Domain definitions stay in the
-module they define: the zoning taxonomy is in `categorize.py` and the report's
-column labels are in `report.py`, because those are what those modules are for.
+module they define: the zoning taxonomy is in `categorize.py`, the report's
+column labels are in `report.py`, and the output paths are in `main.py`, because
+those are what those modules are for.
 """
-
-from pathlib import Path
 
 # --- Chicago Data Portal (Socrata/SODA) --------------------------------------
 
 SOCRATA_BASE_URL = "https://data.cityofchicago.org/resource"
 
-# Boundaries - Zoning Districts (current). One polygon per zoning district,
-# carrying a `zone_class` code such as "RS-1". Roughly 15,000 rows, no ward
-# information. https://dev.socrata.com/foundry/data.cityofchicago.org/dj47-wfun
+# Boundaries - Zoning Districts (current).
+# https://dev.socrata.com/foundry/data.cityofchicago.org/dj47-wfun
 ZONING_DATASET_ID = "dj47-wfun"
 
-# Boundaries - Wards (2023-). One polygon per ward, 50 rows, no zoning
-# information. https://dev.socrata.com/foundry/data.cityofchicago.org/p293-wvbd
+# Boundaries - Wards (2023-).
+# https://dev.socrata.com/foundry/data.cityofchicago.org/p293-wvbd
 WARDS_DATASET_ID = "p293-wvbd"
 
 # Rows per paginated request. This is a choice, not an API limit: Socrata's
@@ -63,10 +61,3 @@ SQ_FEET_PER_SQ_MILE = 5_280**2
 # that ward's row badly enough that both reports footnote it.
 OHARE_ZONE_CLASS = "PD 0"
 
-# --- Output locations --------------------------------------------------------
-#
-# Relative to the working directory, so the pipeline expects to be run from the
-# repository root.
-
-PROCESSED_DIR = Path("data/processed")
-OUTPUT_DIR = Path("output")

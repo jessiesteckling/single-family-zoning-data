@@ -1,31 +1,16 @@
-"""Shared configuration: dataset identifiers, API settings, coordinate systems
-and unit conversions.
-
-What belongs here is cross-cutting -- used by more than one module, or a value
-worth stating once so a change lands everywhere. Domain definitions stay in the
-module they define: the zoning taxonomy is in `categorize.py`, the report's
-column labels are in `report.py`, and the output paths are in `main.py`, because
-those are what those modules are for.
-"""
-
 # --- Chicago Data Portal -----------------------------------------------------
 
 DATA_PORTAL_BASE_URL = "https://data.cityofchicago.org/resource"
 
-# Boundaries - Zoning Districts (current). One polygon per zoning district,
-# carrying a `zone_class` code such as "RS-1". Roughly 15,000 rows, and no ward
-# information -- which is why the two datasets have to be overlaid.
+# Boundaries - Zoning Districts (current).
 # https://data.cityofchicago.org/Community-Economic-Development/Boundaries-Zoning-Districts-current-/dj47-wfun
 ZONING_DATASET_ID = "dj47-wfun"
 
-# Boundaries - Wards (2023-). One polygon per ward, 50 rows, no zoning
-# information.
+# Boundaries - Wards (2023-).
 # https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Wards-2023-/p293-wvbd
 WARDS_DATASET_ID = "p293-wvbd"
 
-# Rows per paginated request. A choice, not a limit: the portal's $limit
-# defaults to 1,000 and accepts up to 50,000. 5,000 keeps the zoning dataset to
-# three requests.
+# Rows per paginated request.
 PAGE_SIZE = 5000
 
 # --- Coordinate reference systems --------------------------------------------
@@ -34,10 +19,9 @@ PAGE_SIZE = 5000
 # mean. The portal sends latitude and longitude; anything that measures size has
 # to convert first to a system whose numbers are feet.
 #
-# The "EPSG:" prefix is a catalogue reference. EPSG is a public registry of
-# coordinate systems, named for the European Petroleum Survey Group that started
-# it, which gives each system a short stable number rather than a paragraph of
-# description. The two used below are its entries 4326 and 3435.
+# "EPSG:" is a catalogue reference. EPSG is a public registry of coordinate
+# systems (originally the European Petroleum Survey Group), so each system has a
+# short stable number: 4326 and 3435 are the two entries used below.
 
 # What the data arrives in: ordinary latitude and longitude. Fine for saying
 # where something is, useless for measuring how big it is, because a degree is

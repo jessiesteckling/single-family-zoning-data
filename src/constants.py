@@ -27,29 +27,19 @@ PAGE_SIZE = 5000
 
 # --- Coordinate reference systems --------------------------------------------
 
-# What the portal's GeoJSON arrives in. Socrata declares it in the response as
-# "urn:ogc:def:crs:OGC:1.3:CRS84" -- WGS84 longitude/latitude, which for our
-# purposes is EPSG:4326 -- and RFC 7946 requires WGS84 for GeoJSON anyway.
-#
-# It still has to be passed explicitly, because `fetch_geojson` hands
-# `GeoDataFrame.from_features` the bare feature list. The declaration lives on
-# the FeatureCollection wrapper, which `from_features` never sees, so without
-# this the frame comes back with `crs=None` and `to_crs` raises.
+# What the portal's GeoJSON arrives in: WGS84 lon/lat, which Socrata declares as
+# "urn:ogc:def:crs:OGC:1.3:CRS84" and RFC 7946 requires for GeoJSON regardless.
+# It has to be passed explicitly because `fetch_geojson` gives `from_features`
+# the bare feature list, so that declaration -- which sits on the
+# FeatureCollection wrapper -- never reaches it, leaving `crs=None`.
 SOURCE_CRS = "EPSG:4326"
 
-# NAD83 / Illinois East, US survey feet -- what areas are measured in.
-#
-# Area needs a projected CRS. In degrees a ward's `.area` comes back as 0.0022
-# "square degrees", which is not a unit: a degree of longitude in Chicago spans
-# 51.6 miles against 69.0 for a degree of latitude, and the ratio shifts with
-# latitude. Projecting flattens the surface so coordinates become feet and
-# `.area` becomes square feet.
-#
-# Flattening always distorts something; State Plane zones stay accurate by being
-# narrow, and Illinois East is the zone covering Chicago. Verified rather than
-# assumed: areas computed in this CRS match the datasets' own shape_area and
-# st_area_sh fields at a ratio of 1.000000 for all 50 wards and at both the 5th
-# and 95th percentile across all 14,982 zoning polygons.
+# NAD83 / Illinois East, in US survey feet -- the CRS every area is measured in.
+# Area cannot be computed in SOURCE_CRS, whose coordinates are angles: a degree
+# is a different distance depending on direction and latitude. Illinois East is
+# the State Plane zone covering Chicago, so distortion across the city is
+# negligible -- areas computed in it match the datasets' own shape_area and
+# st_area_sh fields to six decimal places.
 PROJECTED_CRS = "EPSG:3435"
 
 # 5,280 feet to a mile, squared -> 27,878,400. PROJECTED_CRS is in feet, so

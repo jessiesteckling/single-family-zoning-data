@@ -21,8 +21,16 @@ The per-ward numbers behind both:
 ## Rebuilding
 
 Only needed to pick up new data — the reports above are current as committed.
-`python3 main.py` rewrites both of them and the CSV. Its first run downloads to
-`data/raw/`; later runs read that cache and do not re-fetch.
+`make refresh` rewrites both of them and the CSV. It re-downloads both datasets from the
+portal every run — about 40 MB, roughly 12 seconds all in — and caches nothing, so a run
+always reflects the portal's current state. It needs network access.
+
+`make install` sets up the locked dependencies first, and `make` on its own lists the
+targets. Each runs through pipenv; pass `PYTHON=python3` to use an interpreter you have
+already set up.
+
+Tests: `make test` — 26 unit tests over literal mock portal responses, no network
+required.
 
 New to this data? Run `python3 local_scripts/explore_api.py` first — it prints example requests/responses from the Chicago Data Portal API so you can see the raw data shape before it's processed.
 

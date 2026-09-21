@@ -12,46 +12,46 @@ from src.analyze import (
     compute_citywide_category_shares,
     compute_ohare_context,
     compute_ward_category_shares,
-    restrict_category_shares,
-    restrict_ward_shares,
+    rescale_category_shares_to,
+    rescale_ward_shares_to,
 )
 from src.categorize import RESIDENTIAL_CATEGORY_ORDER
+from src.constants import WARDS_DATASET_ID, ZONING_DATASET_ID
 from src.fetch_data import fetch_geojson
 from src.report import format_ward_report, ohare_note
 
-ZONING_DATASET_ID = "dj47-wfun"  # Boundaries - Zoning Districts (current)
-WARDS_DATASET_ID = "p293-wvbd"  # Boundaries - Wards (2023-)
-
-RAW_DIR = Path("data/raw")
+# Relative to the working directory, so run this from the repository root.
 PROCESSED_DIR = Path("data/processed")
 OUTPUT_DIR = Path("output")
 
 
 def main() -> None:
-    zoning = fetch_geojson(ZONING_DATASET_ID, RAW_DIR / "zoning.geojson")
-    wards = fetch_geojson(WARDS_DATASET_ID, RAW_DIR / "wards.geojson")
+    zoning = fetch_geojson(ZONING_DATASET_ID)
+    wards = fetch_geojson(WARDS_DATASET_ID)
 
-    shares = compute_ward_category_shares(zoning, wards)
-    citywide = compute_citywide_category_shares(zoning)
+    ward_pct = compute_ward_category_shares(zoning, wards)
+    citywide_pct = compute_citywide_category_shares(zoning)
 
     notes = [ohare_note(compute_ohare_context(zoning, wards))]
 
-    residential_shares = restrict_ward_shares(shares, RESIDENTIAL_CATEGORY_ORDER)
-    residential_citywide = restrict_category_shares(
-        citywide, RESIDENTIAL_CATEGORY_ORDER
+    # The residential report is the same table rescaled, not a second analysis:
+    # drop the "Other" column and renormalise the remaining three to 100.
+    residential_ward_pct = rescale_ward_shares_to(ward_pct, RESIDENTIAL_CATEGORY_ORDER)
+    residential_citywide_pct = rescale_category_shares_to(
+        citywide_pct, RESIDENTIAL_CATEGORY_ORDER
     )
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    shares.to_csv(PROCESSED_DIR / "ward_zoning_shares.csv", index=False)
+    ward_pct.to_csv(PROCESSED_DIR / "ward_zoning_shares.csv", index=False)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     reports = {
         OUTPUT_DIR
-        / "ward_zoning_report.md": format_ward_report(shares, citywide, notes=notes),
+        / "ward_zoning_report.md": format_ward_report(ward_pct, citywide_pct, notes=notes),
         OUTPUT_DIR
         / "ward_zoning_report_residential.md": format_ward_report(
-            residential_shares,
-            residential_citywide,
+            residential_ward_pct,
+            residential_citywide_pct,
             categories=RESIDENTIAL_CATEGORY_ORDER,
             title="Share of residentially zoned land, by ward",
             notes=notes,

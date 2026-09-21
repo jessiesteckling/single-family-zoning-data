@@ -1,41 +1,44 @@
-"""Fetch GeoJSON datasets from the Chicago Data Portal (Socrata/SODA API),
-caching each one to a local file so repeated runs don't re-download.
-"""
+"""Fetch GeoJSON datasets from the Chicago Data Portal.
 
-import json
-from pathlib import Path
+Every run downloads fresh. Nothing is written to disk and nothing is read from
+it, so a report always reflects the portal's current state rather than whatever
+snapshot happened to be sitting in the working tree.
+"""
 
 import geopandas as gpd
 import requests
 
-SOCRATA_BASE_URL = "https://data.cityofchicago.org/resource"
-PAGE_SIZE = 5000
+from .constants import DATA_PORTAL_BASE_URL, PAGE_SIZE, SOURCE_CRS
 
 
-def fetch_geojson(dataset_id: str, cache_path: Path) -> gpd.GeoDataFrame:
-    """Return a dataset as a GeoDataFrame, downloading and paginating through
-    the Socrata API on first use and reading from `cache_path` afterward.
+def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
+    """Return a dataset as a GeoDataFrame, paginating through the portal API.
+
+    The CRS comes from whatever the response declares, falling back to
+    SOURCE_CRS when it declares nothing.
     """
-    if cache_path.exists():
-        return gpd.read_file(cache_path)
-
     features = []
+    declared_crs = None
     offset = 0
     while True:
         url = (
-            f"{SOCRATA_BASE_URL}/{dataset_id}.geojson"
+            f"{DATA_PORTAL_BASE_URL}/{dataset_id}.geojson"
             f"?$limit={PAGE_SIZE}&$offset={offset}"
         )
         response = requests.get(url, timeout=60)
         response.raise_for_status()
-        page = response.json()
-        page_features = page["features"]
+        payload = response.json()
+        declared_crs = declared_crs or _declared_crs(payload)
+        page_features = payload["features"]
         features.extend(page_features)
         if len(page_features) < PAGE_SIZE:
             break
         offset += PAGE_SIZE
 
-    geojson = {"type": "FeatureCollection", "features": features}
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(json.dumps(geojson))
-    return gpd.read_file(cache_path)
+    return gpd.GeoDataFrame.from_features(features, crs=declared_crs or SOURCE_CRS)
+
+
+def _declared_crs(payload: dict) -> str | None:
+    """The CRS named in a response, or None if it does not name one."""
+    crs = payload.get("crs") or {}
+    return (crs.get("properties") or {}).get("name")

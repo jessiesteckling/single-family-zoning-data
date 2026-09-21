@@ -8,11 +8,11 @@ reach it. Companion to [review-findings.md](review-findings.md), which lists the
 Verdicts: **Holds** — tested, no action. **Caveat** — true but narrower than the code or
 prose implies. **Broken** — false as relied upon.
 
-Method: the pipeline was re-run from the cached raw data and reproduced
-`data/processed/ward_zoning_shares.csv` to within 7e-15, so all measurements below describe
-the data that produced the committed output. The Data Portal returned HTTP 503 for the
-whole domain during the review, so API behavior was verified from Socrata's documentation
-and the cached 14,986-feature response rather than live calls.
+Method: the pipeline was re-run and reproduced `data/processed/ward_zoning_shares.csv` to
+within 7e-15, so every measurement below describes the data behind the committed output.
+The Data Portal was unreachable during the first pass (HTTP 503 across the whole domain),
+so section A was initially verified against Socrata's documentation and then re-checked
+against the live API on 2026-09-20.
 
 ## A. Data acquisition
 
@@ -20,14 +20,12 @@ and the cached 14,986-feature response rather than live calls.
 |---|---|---|---|
 | A1 | `dj47-wfun` and `p293-wvbd` are the intended datasets | Holds | Confirmed as Zoning Districts (current) and Wards (2023-) |
 | A2 | The "current" dataset holds only live records, one per district | Holds | 0 duplicate `objectid` or `globalid`; `edit_statu`, `zoning_rel`, `override_c`, `case_type` wholly null; `override_r` is `'0'` for all 14,986 rows |
-| A3 | The cached data is current | Holds | Max `edit_date` 2026-08-31. Live row count on 2026-09-20 is still 14,986, matching the cache. Not guaranteed to stay true — see A6 |
-| A4 | Socrata GeoJSON is WGS84 when no `crs` member is present | Holds | RFC 7946 mandates it; geopandas read both files as EPSG:4326 |
-| A5 | `$limit`/`$offset` paging without `$order` returns each row exactly once | Holds in fact, unguaranteed by contract | Tested live 2026-09-20: paging with and without `$order` both returned 14,986 rows, 0 duplicates, identical `objectid` sets, matching `count(*)`. Socrata guarantees no ordering, so this is correct by luck. `$order=:id` costs nothing. H4, downgraded from broken |
-| A6 | A cached file is an acceptable substitute for a fetch | **Broken** as documented | `fetch_geojson` returns the cache unconditionally with no TTL or refresh path, so `README.md:6`'s claim to "fetch the latest data" is false. H6 |
-| A7 | A page shorter than `PAGE_SIZE` means the dataset is exhausted | Held here; unguarded in general | `count(*)` returns 14,986 and the cached file holds exactly 14,986 features, so the download was complete. Any partial page would still end the loop silently, and no assertion would catch it. H5 |
-| A8 | 5,000 is the API's per-request cap | **Broken** | Default `$limit` is 1,000; SODA 2.0 maximum is 50,000; 2.1 and 3.0 have none. 5,000 is self-imposed. L1 |
-| A8b | Plain `.json` returns attributes only, no geometry | **Broken** | Both datasets return geometry as a nested `the_geom` column on `.json`. Separately, `.json` omits null-valued fields per row (zoning: 13 keys returned against 24 `.geojson` properties, 12 null) so one `.json` row under-reports the schema. Both claims were wrong in `explore_api.py`'s comments; corrected there |
-| A9 | The response always contains a `features` key | Caveat | `page["features"]` raises a bare `KeyError` otherwise. `raise_for_status()` caught the 503 seen in review; a 200 with an error body would not be. L3 |
+| A3 | The CRS of the incoming data is known | Holds; now read rather than assumed | The portal declares `urn:ogc:def:crs:OGC:1.3:CRS84` in the response's top-level `crs` key, and documents that member in its GeoJSON format reference. `fetch_geojson` uses the declared value and falls back to `SOURCE_CRS` only when the key is absent, which RFC 7946 permits since it dropped the member and fixed GeoJSON to WGS84. Switching from the hardcoded value left every output byte-identical. |
+| A4 | `$limit`/`$offset` paging without `$order` returns each row exactly once | Holds in fact, unguaranteed by contract | Tested live 2026-09-20: paging with and without `$order` both returned 14,986 rows, 0 duplicates, identical `objectid` sets, matching `count(*)`. Socrata guarantees no ordering, so this is correct by luck. `$order=:id` costs nothing. H4, downgraded from broken |
+| A5 | A page shorter than `PAGE_SIZE` means the dataset is exhausted | Holds in fact; unguarded in general | A full live download returns 14,986 features against a `count(*)` of 14,986, so no page came back short early. Any partial page would still end the loop silently and no assertion would catch it. H5 |
+| A6 | 5,000 is the API's per-request cap | **Broken** | Default `$limit` is 1,000; SODA 2.0 maximum is 50,000; 2.1 and 3.0 have none. 5,000 is self-imposed. L1 |
+| A7 | Plain `.json` returns attributes only, no geometry | **Broken** | Both datasets return geometry as a nested `the_geom` column on `.json`. Separately, `.json` omits null-valued fields per row (zoning: 13 keys returned against 24 `.geojson` properties, 12 null) so one `.json` row under-reports the schema. Both claims were wrong in `explore_api.py`'s comments; corrected there |
+| A8 | The response always contains a `features` key | Caveat | `page["features"]` raises a bare `KeyError` otherwise. `raise_for_status()` caught the 503 seen in review; a 200 with an error body would not be. L3 |
 
 ## B. Coverage and completeness
 

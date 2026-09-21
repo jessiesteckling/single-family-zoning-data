@@ -8,38 +8,52 @@ column labels are in `report.py`, and the output paths are in `main.py`, because
 those are what those modules are for.
 """
 
-# --- Chicago Data Portal (Socrata/SODA) --------------------------------------
+# --- Chicago Data Portal -----------------------------------------------------
 
-SOCRATA_BASE_URL = "https://data.cityofchicago.org/resource"
+DATA_PORTAL_BASE_URL = "https://data.cityofchicago.org/resource"
 
-# Boundaries - Zoning Districts (current).
-# https://dev.socrata.com/foundry/data.cityofchicago.org/dj47-wfun
+# Boundaries - Zoning Districts (current). One polygon per zoning district,
+# carrying a `zone_class` code such as "RS-1". Roughly 15,000 rows, and no ward
+# information -- which is why the two datasets have to be overlaid.
+# https://data.cityofchicago.org/Community-Economic-Development/Boundaries-Zoning-Districts-current-/dj47-wfun
 ZONING_DATASET_ID = "dj47-wfun"
 
-# Boundaries - Wards (2023-).
-# https://dev.socrata.com/foundry/data.cityofchicago.org/p293-wvbd
+# Boundaries - Wards (2023-). One polygon per ward, 50 rows, no zoning
+# information.
+# https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Wards-2023-/p293-wvbd
 WARDS_DATASET_ID = "p293-wvbd"
 
-# Rows per paginated request. This is a choice, not an API limit: Socrata's
-# $limit defaults to 1,000 and SODA 2.0 permits up to 50,000, while 2.1 and 3.0
-# have no maximum. 5,000 keeps the zoning dataset to three requests.
+# Rows per paginated request. A choice, not a limit: the portal's $limit
+# defaults to 1,000 and accepts up to 50,000. 5,000 keeps the zoning dataset to
+# three requests.
 PAGE_SIZE = 5000
 
 # --- Coordinate reference systems --------------------------------------------
+#
+# A coordinate reference system says what the numbers inside a shape actually
+# mean. The portal sends latitude and longitude; anything that measures size has
+# to convert first to a system whose numbers are feet.
 
-# What the portal's GeoJSON arrives in: WGS84 lon/lat, which Socrata declares as
-# "urn:ogc:def:crs:OGC:1.3:CRS84" and RFC 7946 requires for GeoJSON regardless.
-# It has to be passed explicitly because `fetch_geojson` gives `from_features`
-# the bare feature list, so that declaration -- which sits on the
-# FeatureCollection wrapper -- never reaches it, leaving `crs=None`.
+# What the data arrives in: ordinary latitude and longitude. Fine for saying
+# where something is, useless for measuring how big it is, because a degree is
+# not a fixed distance -- one degree of longitude covers about 52 miles in
+# Chicago, against about 69 miles for a degree of latitude.
+#
+# We state it here rather than reading it off the response. The portal does
+# label its data correctly, but that label sits on a wrapper around the list of
+# shapes, and `fetch_geojson` hands geopandas only the shapes themselves, so the
+# label never reaches it. (WGS84 longitude/latitude.)
 SOURCE_CRS = "EPSG:4326"
 
-# NAD83 / Illinois East, in US survey feet -- the CRS every area is measured in.
-# Area cannot be computed in SOURCE_CRS, whose coordinates are angles: a degree
-# is a different distance depending on direction and latitude. Illinois East is
-# the State Plane zone covering Chicago, so distortion across the city is
-# negligible -- areas computed in it match the datasets' own shape_area and
-# st_area_sh fields to six decimal places.
+# What everything is converted to before any area is measured: a flat grid laid
+# over eastern Illinois whose coordinates are in feet, so a polygon's area comes
+# out in square feet.
+#
+# Flattening a round planet always stretches something, so the grid has to be
+# one drawn for this part of the world -- Chicago sits well inside this one.
+# Checked rather than assumed: areas measured on it match the areas the City
+# ships alongside its own data to six decimal places.
+# (NAD83 / Illinois State Plane East, US survey feet.)
 PROJECTED_CRS = "EPSG:3435"
 
 # 5,280 feet to a mile, squared -> 27,878,400. PROJECTED_CRS is in feet, so
@@ -54,4 +68,3 @@ SQ_FEET_PER_SQ_MILE = 5280**2
 # of ward 41 and 32% of all planned-development land citywide, which distorts
 # that ward's row badly enough that both reports footnote it.
 OHARE_ZONE_CLASS = "PD 0"
-

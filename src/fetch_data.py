@@ -8,7 +8,7 @@ snapshot happened to be sitting in the working tree.
 import geopandas as gpd
 import requests
 
-from .constants import PAGE_SIZE, SOCRATA_BASE_URL, SOURCE_CRS
+from .constants import DATA_PORTAL_BASE_URL, PAGE_SIZE, SOURCE_CRS
 
 
 def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
@@ -17,7 +17,7 @@ def fetch_geojson(dataset_id: str) -> gpd.GeoDataFrame:
     offset = 0
     while True:
         url = (
-            f"{SOCRATA_BASE_URL}/{dataset_id}.geojson"
+            f"{DATA_PORTAL_BASE_URL}/{dataset_id}.geojson"
             f"?$limit={PAGE_SIZE}&$offset={offset}"
         )
         response = requests.get(url, timeout=60)

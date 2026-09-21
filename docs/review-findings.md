@@ -310,8 +310,8 @@ changes would predict.
 Originally: no test directory existed, though CLAUDE.md asks for "small, testable functions
 for data transformations ... so they can be verified independently of the chart output".
 
-Resolved: `tests/unit/` holds 25 tests over literal mock portal responses, run with
-`make test` and verified to pass with sockets disabled.
+Resolved: `tests/unit/` covers the pipeline with literal mock portal responses, run
+with `make test` and verified to pass with sockets disabled.
 The fixtures are a two-ward toy city whose middle district straddles the ward line, so the
 overlay's defining behaviour — splitting a district between the wards it falls in rather
 than assigning it to one — is asserted directly.
